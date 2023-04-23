@@ -21,9 +21,11 @@ def medida_assimetria(q1, q2, q3):
 
 def descreve_informacoes(df_referencia):
   global indices
-
-  df_referencia['Coeficiente_de_progressao'] = df_referencia['Coeficiente_de_progressao'].astype(str).str.replace(',','.')
-  df_referencia['Coeficiente_de_progressao'] = df_referencia['Coeficiente_de_progressao'].replace('-', np.nan).astype(float)
+ 
+  df_referencia.loc[:,'Coeficiente_de_progressao'] = df_referencia['Coeficiente_de_progressao'].astype(str).str.replace(',','.')
+  df_referencia.loc[:,'Coeficiente_de_progressao'] = df_referencia['Coeficiente_de_progressao'].replace('-', np.nan).astype(float)
+  #df_referencia['Coeficiente_de_progressao'] = df_referencia['Coeficiente_de_progressao'].astype(str).str.replace(',','.')
+  #df_referencia['Coeficiente_de_progressao'] = df_referencia['Coeficiente_de_progressao'].replace('-', np.nan).astype(float)
 
   df_retorno = df_referencia.describe()  
   moda = df_referencia['Coeficiente_de_progressao'].mode()
@@ -36,7 +38,7 @@ def descreve_informacoes(df_referencia):
 
   valor_max = df_retorno.loc['max']
   valor_min = df_retorno.loc['min']
-  amplitude = pd.Series(data={'Coeficiente_de_progressao': int(valor_max['Coeficiente_de_progressao']) - int(valor_min['Coeficiente_de_progressao'])}, name='Amplitude')
+  amplitude = pd.Series(data={'Coeficiente_de_progressao': float(valor_max['Coeficiente_de_progressao']) - float(valor_min['Coeficiente_de_progressao'])}, name='Amplitude')
   df_retorno = df_retorno._append(amplitude, ignore_index=False)
 
   q1 = df_retorno['Coeficiente_de_progressao'].loc['25%']

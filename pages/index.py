@@ -332,7 +332,8 @@ fig21.update_layout(yaxis={'title':'Porcentagem'},
 
 #QuantidadeAlunasMatriculadasENG
 df_matricula_engenharia = df_engenharia_novo[(df_engenharia_novo.Sexo=='F')]
-df_matricula_engenharia['Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
+#df_matricula_engenharia['Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
+df_matricula_engenharia.loc[:,'Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
 grafico_matricula_engenharia = df_matricula_engenharia['Matricula'].value_counts().sort_index()
 colors = ['#6495ED']
 fig22 = px.bar(grafico_matricula_engenharia,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre - Engenharia',color_discrete_sequence=colors)
@@ -341,7 +342,8 @@ fig22.update_layout(yaxis={'title':'Quantidade de alunas matriculadas'},
 
 #SituçãoAlunasENG
 df_matricula_engenharia = df_engenharia_novo[(df_engenharia_novo.Sexo=='F')]
-df_matricula_engenharia['Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
+df_matricula_engenharia.loc[:,'Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
+#df_matricula_engenharia['Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
 
 colors = ['#9ACD32','#FF6347','#6495ED']
 
@@ -358,7 +360,8 @@ fig23.update_layout(yaxis={'title':'Porcentagem'},
 
 #QuantidadeAlunasMatriculadasTEL
 df_matricula_telematica = df_telematica_novo[(df_telematica_novo.Sexo=='F')]
-df_matricula_telematica['Matricula'] = df_matricula_telematica['Matricula'].astype(str)
+#df_matricula_telematica['Matricula'] = df_matricula_telematica['Matricula'].astype(str)
+df_matricula_telematica.loc[:,'Matricula'] = df_matricula_telematica['Matricula'].astype(str)
 grafico_matricula_telematica = df_matricula_telematica['Matricula'].value_counts().sort_index()
 colors = ['#6495ED']
 fig24 = px.bar(grafico_matricula_telematica,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre - Telemática',color_discrete_sequence=colors)
@@ -367,7 +370,8 @@ fig24.update_layout(yaxis={'title':'Quantidade de alunas matriculadas'},
 
 #SituçãoAlunasTEL
 df_matricula_tel = df_telematica_novo[(df_telematica_novo.Sexo=='F')]
-df_matricula_tel['Matricula'] = df_matricula_tel['Matricula'].astype(str)
+df_matricula_tel.loc[:,'Matricula'] = df_matricula_tel['Matricula'].astype(str)
+#df_matricula_tel['Matricula'] = df_matricula_tel['Matricula'].astype(str)
 
 colors = ['black','#9ACD32','#FF6347','#6495ED']
 
@@ -382,29 +386,9 @@ fig25 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação
 fig25.update_layout(yaxis={'title':'Porcentagem'},
                    xaxis={'title': 'Semestre'})
 ###################################LAYOUT###################################################################
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+#dash.register_page(__name__, path='/')
 
-app.layout = html.Div([
-    dbc.Row(
-    dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(dbc.NavLink("Page 1", href="#")),
-            dbc.DropdownMenu(
-                children=[
-                    dbc.DropdownMenuItem("More pages", header=True),
-                    dbc.DropdownMenuItem("Page 2", href="#"),
-                    dbc.DropdownMenuItem("Page 3", href="#"),
-                ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
-        ],
-    brand="Dados Gerais",
-    brand_href="#",
-    color="primary",
-    dark=True,
-)),
+layout = html.Div([
     dbc.Row([
         dbc.Col(
             dbc.Card(
@@ -463,7 +447,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaoeng',
+                        id='grafico-modalidade',
                         figure=fig9
                     )),style={"width": "100%"},
             ),width=3),
@@ -471,7 +455,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-sexo',
                         figure=fig10)
                     ),style={"width": "100%"},
         ),width=3),
@@ -479,7 +463,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-zona',
                         figure=fig11)
                     ),style={"width": "100%"},
         ),width=3),
@@ -487,7 +471,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-cor',
                         figure=fig12)
                     ),style={"width": "100%"},
         ),width=3)
@@ -498,7 +482,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaoeng',
+                        id='grafico-escola',
                         figure=fig13
                     )),style={"width": "100%"},
             ),width=3),
@@ -506,7 +490,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-idade1',
                         figure=fig14)
                     ),style={"width": "100%"},
         ),width=3),
@@ -514,7 +498,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-idade2',
                         figure=fig15)
                     ),style={"width": "100%"},
         ),width=3),
@@ -522,7 +506,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-renda',
                         figure=fig16)
                     ),style={"width": "100%"},
         ),width=3)
@@ -533,7 +517,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='naturalidade',
+                        id='grafico-naturalidade',
                         figure=fig19
                     )),style={"width": "100%"},
             ),width=4),
@@ -541,7 +525,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='bairros',
+                        id='grafico-bairros',
                         figure=fig20)
                     ),style={"width": "100%"},
         ),width=4),
@@ -549,7 +533,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='ingresso',
+                        id='grafico-ingresso',
                         figure=fig21)
                     ),style={"width": "100%"},
         ),width=4),
@@ -595,7 +579,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaoeng',
+                        id='grafico-alunaseng',
                         figure=fig22
                     )),style={"width": "100%"},
             ),width=3),
@@ -603,7 +587,7 @@ app.layout = html.Div([
                 dbc.Card(
                     dbc.CardBody(
                         dcc.Graph(
-                            id='ghistograma-tempoconclusaoeng',
+                            id='grafico-situacaoalunaseng',
                             figure=fig23)
                         ),style={"width": "100%"},
             ),width=3),
@@ -611,7 +595,7 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-alunastel',
                         figure=fig24)
                     ),style={"width": "100%"},
         ),width=3),
@@ -619,7 +603,7 @@ app.layout = html.Div([
                 dbc.Card(
                     dbc.CardBody(
                         dcc.Graph(
-                            id='ghistograma-tempoconclusaotel',
+                            id='grafico-situacaoalunastel',
                             figure=fig25)
                         ),style={"width": "100%"},
             ),width=3)
@@ -627,5 +611,4 @@ app.layout = html.Div([
     
 ],style={"width": "100%"})
 
-if __name__ == '__main__':
-	app.run_server(debug=True)
+

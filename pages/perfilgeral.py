@@ -1,4 +1,5 @@
 from dash import Dash, html, dcc
+import dash
 import plotly.express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
@@ -6,8 +7,6 @@ from base_de_dados import dataframe, dataframenovo
 from tratamento_de_dados import geral
 from funcoes import descreve_informacoes
 
-
-#dash.register_page(__name__,path="/perfilgeral")
 
 ###########################Base de Dados###################################################
 path_engenharia_de_computacao = '/home/iasmin/Documentos/TCC-Dashboard/dados_engenharia.xlsx'
@@ -183,31 +182,11 @@ fig11 = go.Figure(data=[go.Table(
                align='center'))
 ])
 ###################################LAYOUT###################################################################
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+#dash.register_page(__name__)
 
 
-app.layout = html.Div([
-    dbc.Row(
-    dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(dbc.NavLink("Page 1", href="/home")),
-            dbc.DropdownMenu(
-                children=[
-                    dbc.DropdownMenuItem("More pages", header=True),
-                    dbc.DropdownMenuItem("Page 2", href="#"),
-                    dbc.DropdownMenuItem("Page 3", href="#"),
-                ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
-        ],
-    brand="Perfil Geral",
-    brand_href="#",
-    color="primary",
-    dark=True,
-)),
-
+layout = html.Div([
     dbc.Row([
         dbc.Col(
             dbc.Card(
@@ -319,5 +298,5 @@ app.layout = html.Div([
 ],style={"width": "100%"})
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)

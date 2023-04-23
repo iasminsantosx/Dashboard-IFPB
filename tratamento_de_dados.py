@@ -63,7 +63,16 @@ def renomenado_colunas(df,df_novo):
     df_novo.rename(columns = {'Forma de ingresso':'Forma_de_ingresso'}, inplace = True)
     df_novo.rename(columns = {'Tipo da escola anterior':'Tipo_da_escola_anterior'}, inplace = True)
     df_novo.rename(columns = {'Tipo da zona residencial':'Tipo_da_zona_residencial'}, inplace = True)
+
     return df,df_novo
+
+def renomenado_colunas_tel_eng(df_engenharia_novo,df_telematica_novo):
+
+    df_engenharia_novo.rename(columns = {'Ano de ingresso':'Ano_de_ingresso'}, inplace = True)
+
+    df_telematica_novo.rename(columns = {'Ano de ingresso':'Ano_de_ingresso'}, inplace = True)
+    
+    return df_engenharia_novo,df_telematica_novo
 
 #AGRUPANDO FORMAS DE INGRESSO
 def agrupando_formas_de_ingresso(df):

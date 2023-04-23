@@ -3,7 +3,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from base_de_dados import dataframe, dataframenovo,df_engenharia_telematica
-from tratamento_de_dados import geral
+from tratamento_de_dados import geral,renomenado_colunas_tel_eng
 from funcoes import descreve_informacoes
 import dash
 
@@ -13,10 +13,10 @@ path_telematica = '/home/iasmin/Documentos/TCC-Dashboard/dados_telematica.xlsx'
 
 df = dataframe(path_engenharia_de_computacao,path_telematica)
 df_novo = dataframenovo(path_engenharia_de_computacao,path_telematica)
-
+df_engenharia_novo,df_telematica_novo = df_engenharia_telematica(path_engenharia_de_computacao,path_telematica)
 #######################################TRATAMENTO DE DADOS################################
 df,df_novo = geral(df,df_novo)
-df_engenharia_novo,df_telematica_novo = df_engenharia_telematica(path_engenharia_de_computacao,path_telematica)
+df_engenharia_novo,df_telematica_novo = renomenado_colunas_tel_eng(df_engenharia_novo,df_telematica_novo)
 ##############################PLOTANDO GRAFICOS#############################################################
 df_evadidos = df[df.Situacao.isin(['trancado', 'evadido', 'cancelado compulsoriamente', 'cancelado voluntariamente','afastado','trancado voluntariamente','transferido externamente','transferido internamente'])]
 #AlunosxModalidade
@@ -160,10 +160,10 @@ fig9.update_yaxes(visible=False)
 
 #EvasãoXAno
 df_ano_evasao_engenharia = df_engenharia_novo[df_engenharia_novo.Situacao.isin(['Afastado', 'Cancelado compulsoriamente', 'Cancelado voluntariamente', 'Evadido'])]
-grafico_ano_evasao_engenharia = df_ano_evasao_engenharia['Ano de ingresso'].value_counts().sort_index()
+grafico_ano_evasao_engenharia = df_ano_evasao_engenharia['Ano_de_ingresso'].value_counts().sort_index()
 
 df_ano_evasao_telematica = df_telematica_novo[df_telematica_novo.Situacao.isin(['Afastado', 'Cancelado compulsoriamente', 'Cancelado voluntariamente', 'Evadido'])]
-grafico_ano_evasao_telematica = df_ano_evasao_telematica['Ano de ingresso'].value_counts().sort_index()
+grafico_ano_evasao_telematica = df_ano_evasao_telematica['Ano_de_ingresso'].value_counts().sort_index()
 
 fig11 = go.Figure()
 fig11.add_trace(go.Scatter(x = grafico_ano_evasao_engenharia.index, y = grafico_ano_evasao_engenharia.values, name = 'Engenharia de Computação'))
@@ -188,29 +188,9 @@ fig12 = go.Figure(data=[go.Table(
 ])
 ###################################LAYOUT###################################################################
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-app.layout = html.Div([
-    dbc.Row(
-    dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(dbc.NavLink("Page 1", href="/home")),
-            dbc.DropdownMenu(
-                children=[
-                    dbc.DropdownMenuItem("More pages", header=True),
-                    dbc.DropdownMenuItem("Page 2", href="#"),
-                    dbc.DropdownMenuItem("Page 3", href="#"),
-                ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
-        ],
-    brand="Perfil Aluno Evadido",
-    brand_href="#",
-    color="primary",
-    dark=True,
-)),
 
+#dash.register_page(__name__)
+layout = html.Div([
     dbc.Row([
         dbc.Col(
             dbc.Card(
@@ -321,5 +301,5 @@ app.layout = html.Div([
 ],style={"width": "100%"})
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
