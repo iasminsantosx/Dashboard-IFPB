@@ -22,3 +22,15 @@ def df_engenharia_telematica(path_engenharia_de_computacao,path_telematica):
     df_telematica_novo = pd.read_excel(path_telematica,sheet_name="NOVO")
 
     return df_engenharia_novo,df_telematica_novo
+
+def matriculado_evadido(path_matriculado,path_evadido):
+
+    df_matriculado = pd.read_excel(path_matriculado)
+    df_evadido= pd.read_excel(path_evadido)
+    
+    df_eng_mat = df_matriculado.loc[df_matriculado['Qual curso você está matriculado?'] == 'Engenharia de Computação']
+    df_tel_mat = df_matriculado.loc[df_matriculado['Qual curso você está matriculado?'] == 'Telemática']
+    df_eng_evd = df_evadido.loc[df_evadido['Qual curso você fazia: '] == 'Engenharia de Computação']
+    df_tel_evd = df_evadido.loc[df_evadido['Qual curso você fazia: '] == 'Telemática']
+
+    return df_matriculado,df_evadido,df_eng_mat,df_tel_mat,df_eng_evd,df_tel_evd
