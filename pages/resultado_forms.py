@@ -211,9 +211,12 @@ soma1 = soma1.rename(index=dict(zip(cols1, col_labels1)))
 soma1 = soma1.sort_values()
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig13 = px.bar(soma1,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos matriculados em Engenharia de Computação")
-fig13.update_layout(showlegend=False,yaxis={'title':'Pontos'},
-                   xaxis={'title': 'Fatores'})
+fig13 = px.bar(soma1,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos matriculados em Engenharia de Computação",orientation="h",text=[i for i in (soma1.index)])
+fig13.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
+                   xaxis={'title': 'Pontos'})
+fig13.update_traces(textposition='auto')
+fig13.update_xaxes(visible=False)
+fig13.update_yaxes(visible=False)
 
 #Escolha do Curso Telemática Matriculado
 cols2 = df_tel_mat.filter(like='Assinale a coluna que representa a intensidade de influência do fator para a escolha do curso.', axis=1)
@@ -227,9 +230,12 @@ soma2 = soma2.rename(index=dict(zip(cols2, col_labels2)))
 soma2 = soma2.sort_values()
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig14 = px.bar(soma2,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos matriculados em Telemática")
-fig14.update_layout(showlegend=False,yaxis={'title':'Pontos'},
-                   xaxis={'title': 'Fatores'})
+fig14 = px.bar(soma2,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos matriculados em Telemática",orientation="h",text=[i for i in (soma2.index)])
+fig14.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
+                   xaxis={'title': 'Pontos'})
+fig14.update_traces(textposition='auto')
+fig14.update_xaxes(visible=False)
+fig14.update_yaxes(visible=False)
 
 #Escolha do Curso Engenharia Evadido
 cols3 = df_eng_evd.filter(like='Assinale a coluna que representa a intensidade de influência do fator para a sua escolha do curso.', axis=1)
@@ -242,9 +248,12 @@ soma3 = soma3.sort_values()
 soma3 = soma3.drop('Linha 6')
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig15 = px.bar(soma3,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos evadidos em Engenharia")
-fig15.update_layout(showlegend=False,yaxis={'title':'Pontos'},
-                   xaxis={'title': 'Fatores'})
+fig15 = px.bar(soma3,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos evadidos em Engenharia",orientation="h",text=[i for i in (soma3.index)])
+fig15.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
+                   xaxis={'title': 'Pontos'})
+fig15.update_traces(textposition='auto')
+fig15.update_xaxes(visible=False)
+fig15.update_yaxes(visible=False)
 
 #Escolha do Curso Telemática Evadido
 cols4 = df_tel_evd.filter(like='Assinale a coluna que representa a intensidade de influência do fator para a sua escolha do curso.', axis=1)
@@ -257,9 +266,12 @@ soma4 = soma4.sort_values()
 soma4 = soma4.drop('Linha 6')
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig16 = px.bar(soma4,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos evadidos em Telemática")
-fig16.update_layout(showlegend=False,yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Fatores'})
+fig16 = px.bar(soma4,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos evadidos em Telemática",orientation="h",text=[i for i in (soma4.index)])
+fig16.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
+                   xaxis={'title': 'Pontos'})
+fig16.update_traces(textposition='auto')
+fig16.update_xaxes(visible=False)
+fig16.update_yaxes(visible=False)
 
 #Influência permanência/abandono matriculado eng
 cols5 = df_eng_mat.filter(like='Assinale a coluna que representa a intensidade de influência do fator para a sua permanência do curso.', axis=1)
@@ -339,14 +351,18 @@ fig20.update_xaxes(visible=False)
 fig20.update_yaxes(visible=False)
 
 #Situação empregaticia matriculados eng
+valor_absoluto3 = df_eng_mat['Qual a sua situação atualmente? '].value_counts()
+porcentagem3 = valor_absoluto3.apply((lambda x: (x*100)/valor_absoluto3.sum()))
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
+fig21 = px.bar(porcentagem3,title='Situação empregatícia atual dos matriculados em Engenharia',
+             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto3.index,porcentagem3)],color_discrete_sequence=[colors],
+            )
+fig21.update_layout(plot_bgcolor = 'white',
+                  margin = dict(t=35, l=10, r=0, b=10),showlegend=False)
+fig21.update_traces(textposition='auto')
+fig21.update_xaxes(visible=False)
+fig21.update_yaxes(visible=False)
 
-fig21 = px.pie(values=df_eng_mat['Qual a sua situação atualmente? '].value_counts(), names=df_eng_mat['Qual a sua situação atualmente? '].value_counts().index,
-             color_discrete_sequence=colors)
-
-fig21.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Situação empregatícia atual dos mtariculados em Engenharia')
-
-fig21.update_traces(textfont_size=16)
 
 #periodo do vinculo empregaticio matriculados eng
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
@@ -359,14 +375,17 @@ fig22.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Período em qu
 fig22.update_traces(textfont_size=16)
 
 #Situação empregaticia matriculados tel
+valor_absoluto = df_tel_mat['Qual a sua situação atualmente? '].value_counts()
+porcentagem = valor_absoluto.apply((lambda x: (x*100)/valor_absoluto.sum()))
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
-
-fig23 = px.pie(values=df_tel_mat['Qual a sua situação atualmente? '].value_counts(), names=df_tel_mat['Qual a sua situação atualmente? '].value_counts().index,
-             color_discrete_sequence=colors)
-
-fig23.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Situação empregatícia atual dos mtariculados em Telemática')
-
-fig23.update_traces(textfont_size=16)
+fig23 = px.bar(porcentagem,title='Situação empregatícia atual dos matriculados em Telemática',
+             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto.index,porcentagem)],color_discrete_sequence=[colors],
+            )
+fig23.update_layout(plot_bgcolor = 'white',
+                  margin = dict(t=35, l=10, r=0, b=10),showlegend=False)
+fig23.update_traces(textposition='auto')
+fig23.update_xaxes(visible=False)
+fig23.update_yaxes(visible=False)
 
 #periodo do vinculo empregaticio matriculados tel
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
@@ -379,22 +398,24 @@ fig24.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Período em qu
 fig24.update_traces(textfont_size=16)
 
 #Situação empregaticio evadidos eng
-valor_absoluto1 = df_eng_evd['Trabalha em qual área atualmente:'].value_counts()
-porcentagem1 = valor_absoluto1.apply((lambda x: (x*100)/df_eng_evd['Trabalha em qual área atualmente:'].value_counts().sum()))
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
 
-colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig25 = px.bar(porcentagem1,color_discrete_sequence=[colors],title="Área em que trabalha atualmente - Engenharia")
-fig25.update_layout(showlegend=False,yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Áreas'})
+fig25 = px.pie(values=df_eng_evd['Trabalha em qual área atualmente:'].value_counts(), names=df_eng_evd['Trabalha em qual área atualmente:'].value_counts().index,
+             color_discrete_sequence=colors)
+
+fig25.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Área em que trabalha atualmente - Engenharia')
+
+fig25.update_traces(textfont_size=16)
 
 #Situação empregaticio evadidos Tel
-valor_absoluto2 = df_tel_evd['Trabalha em qual área atualmente:'].value_counts()
-porcentagem2 = valor_absoluto2.apply((lambda x: (x*100)/df_tel_evd['Trabalha em qual área atualmente:'].value_counts().sum()))
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
 
-colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d','#f94b00','#f97100','#f99e00','#f9bd00']
-fig26 = px.bar(porcentagem2,color_discrete_sequence=[colors],title="Área em que trabalha atualmente - Telemática")
-fig26.update_layout(showlegend=False,yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Áreas'})
+fig26 = px.pie(values=df_tel_evd['Trabalha em qual área atualmente:'].value_counts(), names=df_tel_evd['Trabalha em qual área atualmente:'].value_counts().index,
+             color_discrete_sequence=colors)
+
+fig26.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Área em que trabalha atualmente - Telemática')
+
+fig26.update_traces(textfont_size=16)
 
 #Avaliação matriculados eng
 aval1 = df_eng_mat.filter(like='Qual a nota você atribui para o quanto os seguintes aspectos influenciam na sua permanência no curso? Considerando 1 como a nota mínima e 5 a nota máxima.', axis=1)

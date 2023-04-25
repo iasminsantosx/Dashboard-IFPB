@@ -1,20 +1,22 @@
-from dash import Dash, html, dcc
+from dash import  html, dcc
 import plotly.express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
-from base_de_dados import dataframe, dataframenovo, df_engenharia_telematica
 from tratamento_de_dados import geral
 import pandas as pd
-import dash
+
 
 ###########################Base de Dados###################################################
 path_engenharia_de_computacao = '/home/iasmin/Documentos/TCC-Dashboard/dados_engenharia.xlsx'
 path_telematica = '/home/iasmin/Documentos/TCC-Dashboard/dados_telematica.xlsx'
 
-df = dataframe(path_engenharia_de_computacao,path_telematica)
-df_novo = dataframenovo(path_engenharia_de_computacao,path_telematica)
+df_engenharia = pd.read_excel(path_engenharia_de_computacao)
+df_telematica = pd.read_excel(path_telematica)
+df_engenharia_novo = pd.read_excel(path_engenharia_de_computacao,sheet_name="NOVO")
+df_telematica_novo = pd.read_excel(path_telematica,sheet_name="NOVO")
 
-df_engenharia_novo,df_telematica_novo = df_engenharia_telematica(path_engenharia_de_computacao,path_telematica)
+df = pd.concat([df_engenharia,df_telematica], axis=0)
+df_novo = pd.concat([df_engenharia_novo,df_telematica_novo], axis=0)
 #######################################TRATAMENTO DE DADOS################################
 df,df_novo = geral(df,df_novo)
 
@@ -25,14 +27,14 @@ df_agrupado['Situacao'].unique()
 ##############################PLOTANDO GRAFICOS#############################################################
 
 #Situação Geral
-df_situacao_geral = df_novo['Situacao'].value_counts().to_frame()
+df_situacao_geral = df_agrupado['Situacao'].value_counts().to_frame()
 
-valor_absoluto = df_novo['Situacao'].value_counts()
-porcentagem = valor_absoluto.apply((lambda x: (x*100)/df_novo['Situacao'].value_counts().sum()))
+valor_absoluto1 = df_agrupado['Situacao'].value_counts()
+porcentagem1 = valor_absoluto1.apply((lambda x: (x*100)/df_agrupado['Situacao'].value_counts().sum()))
 
-colors = ['#9ACD32','#FF6347','#FF6347','#6495ED','#FF6347','#FF6347','#FF6347','#9ACD32','#9ACD32','#FF6347','#FF6347','#FF6347','black']
+colors = ['#FF6347','#6495ED','#9ACD32','black']
 
-fig1 = px.bar(df_situacao_geral,x=df_situacao_geral.index,y='count', title='Alunos por Situações nos cursos de TIC',text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem)],color_discrete_sequence=[colors])
+fig1 = px.bar(df_situacao_geral,x=df_situacao_geral.index,y='count', title='Alunos por Situações nos cursos de TIC',text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem1)],color_discrete_sequence=[colors])
 fig1.update_layout(yaxis={'title':'Quantidade de Alunos'},
                    xaxis={'title': 'Situação'})
 
@@ -47,346 +49,173 @@ fig2.update_layout(
         'title': {'text': "TOTAL DE ALUNOS DOS CURSOS DE TIC - IFPB"},}]
                          }})
 
-#Situação Engenharia de Computação
-df_engenharia_novo['Situacao'] = df_engenharia_novo['Situacao'].replace( ['Cancelado voluntariamente', 'Cancelado compulsoriamente', 'Trancado', 'Evadido', 'Afastado',  'Trancado voluntariamente','Transferido externamente', 'Transferido internamente'], 'evadido/trancado')
-df_engenharia_novo['Situacao'] = df_engenharia_novo['Situacao'].replace( ['Matriculado',  'Intercambio', 'Vinculado'], 'matriculado')
-df_engenharia_novo['Situacao'].unique()
+#Evasão por Ano de Ingresso
+df_ano_evasao_engenharia = df_engenharia_novo[df_engenharia_novo.Situacao.isin(['Afastado', 'Cancelado compulsoriamente', 'Cancelado voluntariamente', 'Evadido'])]
+grafico_ano_evasao_engenharia = df_ano_evasao_engenharia['Ano de ingresso'].value_counts().sort_index()
 
-df_engenharia_novo['Matricula'] = df_engenharia_novo['Matricula'].astype(str)
+df_ano_evasao_telematica = df_telematica_novo[df_telematica_novo.Situacao.isin(['Afastado', 'Cancelado compulsoriamente', 'Cancelado voluntariamente', 'Evadido'])]
+grafico_ano_evasao_telematica = df_ano_evasao_telematica['Ano de ingresso'].value_counts().sort_index()
 
-counts = df_engenharia_novo.groupby(['Matricula', 'Situacao']).size()
-counts = counts.unstack(level=-1)
+fig3 = go.Figure()
+fig3.add_trace(go.Scatter(x = grafico_ano_evasao_engenharia.index, y = grafico_ano_evasao_engenharia.values, name = 'Engenharia de Computação'))
+fig3.add_trace(go.Scatter(x = grafico_ano_evasao_telematica.index, y = grafico_ano_evasao_telematica.values, name = 'Telemática'))
 
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
+fig3.update_layout(yaxis={'title':'Número de Alunos evadidos'},
+                   xaxis={'title': 'Ano de Ingresso'},title='Números de alunos evadidos pelo ano de ingresso')
 
-colors = ['#9ACD32','#FF6347','#6495ED','black']
-fig3 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos de cada semestre em Engenharia de Computação',color_discrete_sequence=colors)
-fig3.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Semestre'})
+#AlunosxModalidade
+colors = ['#33e0ff','#ff33dd']
+fig4 = px.pie(values=df['Modalidade'].value_counts(), names=df['Modalidade'].value_counts().index,
+             color_discrete_sequence=colors)
 
-#Situação Telemática
-df_telematica_novo['Situacao'] = df_telematica_novo['Situacao'].replace( ['Cancelado voluntariamente', 'Cancelado compulsoriamente', 'Trancado', 'Evadido', 'Afastado',  'Trancado voluntariamente','Transferido externamente', 'Transferido internamente'], 'evadido/trancado')
-df_telematica_novo['Situacao'] = df_telematica_novo['Situacao'].replace( ['Matriculado',  'Intercambio', 'Vinculado'], 'matriculado')
-df_telematica_novo['Situacao'].unique()
+fig4.update_traces(textposition='outside', textinfo='percent+label', 
+                  hole=.6, hoverinfo="label+percent+name",title='Alunos por Modalidade')
+fig4.update_layout(margin = dict(t=0, l=0, r=0, b=0))
 
-df_telematica_novo['Matricula'] = df_telematica_novo['Matricula'].astype(str)
+#AlunosxSexo
+colors = ['#33e0ff','#ff33dd']
+fig5 = px.pie(values=df['Sexo'].value_counts(), names=df['Sexo'].value_counts().index,
+             color_discrete_sequence=colors)
 
-counts = df_telematica_novo.groupby(['Matricula', 'Situacao']).size()
-counts = counts.unstack(level=-1)
+fig5.update_traces(textposition='outside', textinfo='percent+label', 
+                  hole=.6, hoverinfo="label+percent+name",title='Alunos por Sexo')
+fig5.update_layout(margin = dict(t=0, l=0, r=0, b=0))
 
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
+#AlunosXCor/Raca
+valor_absoluto = df['Cor_Raca'].value_counts()
+porcentagem = valor_absoluto.apply((lambda x: (x*100)/df['Cor_Raca'].value_counts().sum()))
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
+fig6 = px.bar(porcentagem,title='Alunos por Cor/Raca dos cursos de TIC',
+             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto.index,porcentagem)],color_discrete_sequence=[colors],
+            )
+fig6.update_layout(plot_bgcolor = 'white',
+                  margin = dict(t=35, l=10, r=0, b=10),showlegend=False,
+                  yaxis={'categoryorder':'total descending'})
+fig6.update_traces(textposition='auto')
+fig6.update_xaxes(visible=False)
+fig6.update_yaxes(visible=False)
 
-colors = ['black','#9ACD32','#FF6347','#6495ED']
-fig4 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos de cada semestre em Telemática',color_discrete_sequence=colors)
-fig4.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Semestre'})
+#AlunosxTipoEscola
+df_sem_traco1 = df[df.Tipo_da_escola_anterior!='-']
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
 
-#Quantidade alunos engenharia
-total_alunos_eng = len(df_engenharia_novo['Matricula'])
-fig5 = go.Figure()
-fig5 = go.Figure(go.Indicator(
-    mode = "number",
-    value = total_alunos_eng,))
-fig5.update_layout(
-    template = {'data' : {'indicator': [{
-        'title': {'text': "TOTAL DE ALUNOS DE ENGENHARIA DE COMPUTAÇÃO"},}]
-                         }})
+fig7 = px.pie(values=df_sem_traco1['Tipo_da_escola_anterior'].value_counts(), names=df_sem_traco1['Tipo_da_escola_anterior'].value_counts().index,
+             color_discrete_sequence=colors)
 
-#Quantidade alunos telematica
-total_alunos_tel = len(df_telematica_novo['Matricula'])
-fig6 = go.Figure()
-fig6 = go.Figure(go.Indicator(
-    mode = "number",
-    value = total_alunos_tel,))
-fig6.update_layout(
-    template = {'data' : {'indicator': [{
-        'title': {'text': "TOTAL DE ALUNOS DE TELEMÁTICA"},}]
-                         }})
-
-#Tempo de Conclusão eng
-df_conclusao_eng = df_engenharia_novo.copy()
-df_conclusao_eng = df_conclusao_eng[df_engenharia_novo.Situacao.isin(['Formado'])]
-
-df_conclusao_eng['Data da matricula'] = pd.to_datetime(df_conclusao_eng['Data da matricula'], format='%Y/%m/%d %H:%M:%S')
-df_conclusao_eng['Data de conclusao'] = pd.to_datetime(df_conclusao_eng['Data de conclusao'], format='%Y/%m/%d %H:%M:%S')
-
-df_conclusao_eng['Meses Conclusao'] = ((df_conclusao_eng['Data de conclusao'] - df_conclusao_eng['Data da matricula']).dt.days)/30
-df_conclusao_eng['Meses Conclusao'] = df_conclusao_eng['Meses Conclusao'].astype(int)
-
-concluintes_certo2 = df_conclusao_eng[df_conclusao_eng['Meses Conclusao'] > 60]['Meses Conclusao'].value_counts().sum()
-percent = (concluintes_certo2 / len(df_conclusao_eng)) * 100
-
-labels = ['Superior 60 meses ', 'Igual ou inferior a 60 meses']
-sizes = [percent, 100-percent]
-colors = ["royalblue","orange"]
-
-fig7 = px.pie(values=sizes, names=['Superior 60 meses','Igual ou inferior a 60 meses'],color_discrete_sequence=colors)
-
-fig7.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Tempo de Conclusão - Engenharia da Computação')
+fig7.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Aluno por Tipo da escola anterior nos cursos de TIC')
 
 fig7.update_traces(textfont_size=16)
 
-#Tempo de Conclusão Tel
-df_conclusao_tel = df_telematica_novo.copy()
+#AlunosxTipoZona
+df_sem_traco2 = df[df.Tipo_da_zona_residencial!='-']
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
 
-indexNames = df_conclusao_tel[(df_conclusao_tel['Data de conclusao'] == '-')].index
+fig8 = px.pie(values=df_sem_traco2['Tipo_da_zona_residencial'].value_counts(), names=df_sem_traco2['Tipo_da_zona_residencial'].value_counts().index,
+             color_discrete_sequence=colors)
 
-df_conclusao_tel.drop(indexNames, inplace=True)
-
-df_conclusao_tel['Data da matricula'] = pd.to_datetime(df_conclusao_tel['Data da matricula'], format='%Y/%m/%d %H:%M:%S')
-df_conclusao_tel['Data de conclusao'] = pd.to_datetime(df_conclusao_tel['Data de conclusao'], format='%Y/%m/%d %H:%M:%S')
-df_conclusao_tel['Meses Conclusao'] = ((df_conclusao_tel['Data de conclusao'] - df_conclusao_tel['Data da matricula']).dt.days)/30
-df_conclusao_tel['Meses Conclusao']=df_conclusao_tel['Meses Conclusao'].astype(int)
-
-concluintes_certo = df_conclusao_tel[df_conclusao_tel['Meses Conclusao'] > 36]['Meses Conclusao'].value_counts().sum()
-percent = (concluintes_certo / len(df_conclusao_tel)) * 100
-
-labels = ['Superior 36 meses ', 'Igual ou inferior a 36 meses']
-sizes = [percent, 100-percent]
-colors = ["royalblue","orange"]
-
-fig8 = px.pie(values=sizes, names=['Superior 36 meses','Igual ou inferior a 36 meses'],color_discrete_sequence=colors)
-
-fig8.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Tempo de Conclusão - Telemática')
+fig8.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Aluno por Tipo da zona residencial nos cursos de TIC')
 
 fig8.update_traces(textfont_size=16)
 
-#Meses Conclusão Engenharia
-colors = ['orange']
-fig17 = px.histogram(df_conclusao_eng,x='Meses Conclusao',color_discrete_sequence=colors,title='Distribuição de Meses para conclusão - Engenharia de Computação')
+#Naturalidade
+df_sem_traco3 = df[df.Naturalidade!='-']
+cidades = df_sem_traco3['Naturalidade'].value_counts().to_list()
 
-#Meses Conclusão Telematica
-colors = ['#FF6347']
-fig18 = px.histogram(df_conclusao_tel,x='Meses Conclusao',color_discrete_sequence=colors,title='Distribuição de Meses para conclusão - Telemática')
+##################################################
+#Filtrando as 10 cidades com mais alunos do curso
+lista_top10_cidades_values1 = []
+lista_top10_cidades_values_nomes1 = []
 
-#SituaçãoxModalidade
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-counts = df_agrupado.groupby(['Modalidade', 'Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
+for i in range(9):
+  lista_top10_cidades_values1.append(cidades[i])
 
 
-fig9 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Modalidade',color_discrete_sequence=colors)
-fig9.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Modalidade'})
+nomes = df_sem_traco3['Naturalidade'].value_counts().index
 
-#SituaçãoxSexo
-counts = df_agrupado.groupby(['Sexo','Situacao']).size()
-counts = counts.unstack(level=-1)
+for i in range(9):
+  lista_top10_cidades_values_nomes1.append(nomes[i])
+####################################################
 
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
+fig9 = px.bar(x=lista_top10_cidades_values_nomes1,y=lista_top10_cidades_values1,title='Top 10 Naturalidades dos Alunos dos cursos de TIC',color_discrete_sequence=[colors])
 
-colors = ['#FF6347','black','#9ACD32','#6495ED']
+#Bairros
+df_sem_traco3 = df[df.Bairro!='-']
+bairros = df_sem_traco3['Bairro'].value_counts().to_list()
 
-fig10 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Sexo',color_discrete_sequence=colors)
-fig10.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Situacao'})
+##################################################
+#Filtrando as 10 bairro com mais alunos do curso
+lista_top10_bairros_values = []
+lista_top10_bairros_values_nomes = []
 
-#SituaçãoxZona
-df_sem_traco = df_agrupado[df_agrupado.Tipo_da_zona_residencial!='-']
+for i in range(9):
+  lista_top10_bairros_values.append(bairros[i])
 
-counts = df_sem_traco.groupby(['Tipo_da_zona_residencial','Situacao']).size()
-counts = counts.unstack(level=-1)
 
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
+nomes = df_sem_traco3['Bairro'].value_counts().index
 
-colors = ['#FF6347','black','#9ACD32','#6495ED']
+for i in range(9):
+  lista_top10_bairros_values_nomes.append(nomes[i])
+####################################################
 
-fig11 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Tipo da zona residencial',color_discrete_sequence=colors)
-fig11.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Situacao'})
+fig10 = px.bar(x=lista_top10_bairros_values_nomes,y=lista_top10_bairros_values,title='Top 10 Bairros dos Alunos dos cursos de TIC',color_discrete_sequence=[colors])
 
-#SituaçãoXCor
-counts = df_agrupado.groupby(['Cor_Raca','Situacao']).size()
-counts = counts.unstack(level=-1)
+#CotaSISTEC
+df_sem_traco4 = df[df.Cota_SISTEC!='-']
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
 
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig12 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Cor/Raça',color_discrete_sequence=colors)
-fig12.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Cor/Raca'})
-
-#SituaçãoXEscola
-df_sem_traco = df_agrupado[df_agrupado.Tipo_da_escola_anterior!='-']
-counts = df_sem_traco.groupby(['Tipo_da_escola_anterior','Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig13 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Tipo da escola anterior',color_discrete_sequence=colors)
-fig13.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Tipo da escola anterior'})
-
-#SituaçãoxCota
-df_sem_traco = df_agrupado[df_agrupado.Cota_SISTEC!='-']
-counts = df_sem_traco.groupby(['Cota_SISTEC','Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig14 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Cota SISTEC',color_discrete_sequence=colors)
-fig14.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Cota SISTEC'})
-
-#SituaçãoxIdade
-df_idade_maior_30 = df_agrupado[df_agrupado.Idade>=30]
-colors = ['#FF6347','#6495ED','#9ACD32','black']
-
-fig14 = px.pie(values=df_idade_maior_30['Situacao'].value_counts(), names=df_idade_maior_30['Situacao'].value_counts().index,
+fig11 = px.pie(values=df_sem_traco4['Cota_SISTEC'].value_counts(), names=df_sem_traco4['Cota_SISTEC'].value_counts().index,
              color_discrete_sequence=colors)
 
-fig14.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Situação dos Alunos com idade maior que 30, nos cursos de TIC')
+fig11.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Aluno por Cota SISTEC nos cursos de TIC')
 
-fig14.update_traces(textfont_size=16)
+fig11.update_traces(textfont_size=16)
 
-df_idade_menor_30 = df_agrupado[df_agrupado.Idade<=30]
-colors = ['#6495ED','#FF6347','#9ACD32','black']
+#FaixadeRenda
+valor_absoluto3 = df['Faixa_de_renda_(SISTEC)'].value_counts()
+porcentagem3 = valor_absoluto3.apply((lambda x: (x*100)/df['Faixa_de_renda_(SISTEC)'].value_counts().sum()))
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
+fig12 = px.bar(porcentagem3,
+             orientation='h',text=[i+'   ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto3.index,porcentagem3)],color_discrete_sequence=[colors],title='Alunos por Faixa de Renda'
+            )
+fig12.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',
+                  yaxis={'categoryorder':'total descending'},
+                  showlegend=False
+                 )
+fig12.update_traces(textposition='auto')
+fig12.update_xaxes(visible=False)
+fig12.update_yaxes(visible=False)
 
-fig15 = px.pie(values=df_idade_menor_30['Situacao'].value_counts(), names=df_idade_menor_30['Situacao'].value_counts().index,
-             color_discrete_sequence=colors)
+#FormadeIngresso
+valor_absoluto4 = df['Forma_de_ingresso'].value_counts()
+porcentagem4 = valor_absoluto4.apply((lambda x: (x*100)/df['Forma_de_ingresso'].value_counts().sum()))
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
+fig13 = px.bar(porcentagem4,
+             orientation='h',text=[i+'   ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto4.index,porcentagem4)],color_discrete_sequence=[colors],title='Aluno por Forma de ingresso'
+            )
+fig13.update_layout(margin = dict(t=35, l=10, r=0, b=10),
+                    plot_bgcolor = 'white',
+                    yaxis={'categoryorder':'total descending'},
+                    showlegend=False
+                 )
+fig13.update_traces(textposition='auto')
+fig13.update_xaxes(visible=False)
+fig13.update_yaxes(visible=False)
 
-fig15.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Situação dos Alunos com idade menor que 30, nos cursos de TIC')
-
-fig15.update_traces(textfont_size=16)
-
-#SituaçãoxRenda
-counts = df_agrupado.groupby(['Faixa_de_renda_(SISTEC)','Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig16 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Faixa de renda (SISTEC)',color_discrete_sequence=colors)
-fig16.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Faixa de renda (SISTEC)'})
-
-#AlunosxNaturalidade
-df_sem_traco = df_agrupado[df_agrupado.Naturalidade!='-']
-counts = df_sem_traco.groupby(['Naturalidade','Situacao']).size()
-counts = counts.unstack(level=-1)
-
-soma = counts.sum(axis=1)
-counts.insert(4, "Total", soma, True)
-counts=counts.sort_values(by="Total", ascending=False)
-counts=counts.drop(columns=['Total'])
-counts=counts.head(10)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig19 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por top 10 naturalidades',color_discrete_sequence=colors)
-fig19.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Situacao'})
-
-#AlunosxBairro
-df_sem_traco = df_agrupado[df_agrupado.Naturalidade!='-']
-counts = df_sem_traco.groupby(['Bairro','Situacao']).size()
-counts = counts.unstack(level=-1)
-
-soma = counts.sum(axis=1)
-counts.insert(4, "Total", soma, True)
-counts=counts.sort_values(by="Total", ascending=False)
-counts=counts.drop(columns=['Total'])
-counts=counts.head(10)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig20 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por top 10 Bairros',color_discrete_sequence=colors)
-fig20.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Situacao'})
-
-#Forma de Ingresso
-counts = df_agrupado.groupby(['Forma_de_ingresso','Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-colors = ['#FF6347','black','#9ACD32','#6495ED']
-
-fig21 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação dos alunos por Forma de ingresso',color_discrete_sequence=colors)
-fig21.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Forma de Ingresso'})
-
-#QuantidadeAlunasMatriculadasENG
-df_matricula_engenharia = df_engenharia_novo[(df_engenharia_novo.Sexo=='F')]
-#df_matricula_engenharia['Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
-df_matricula_engenharia.loc[:,'Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
-grafico_matricula_engenharia = df_matricula_engenharia['Matricula'].value_counts().sort_index()
-colors = ['#6495ED']
-fig22 = px.bar(grafico_matricula_engenharia,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre - Engenharia',color_discrete_sequence=colors)
-fig22.update_layout(yaxis={'title':'Quantidade de alunas matriculadas'},
-                   xaxis={'title': 'Semestre'},showlegend=False)
-
-#SituçãoAlunasENG
-df_matricula_engenharia = df_engenharia_novo[(df_engenharia_novo.Sexo=='F')]
-df_matricula_engenharia.loc[:,'Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
-#df_matricula_engenharia['Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
-
-colors = ['#9ACD32','#FF6347','#6495ED']
-
-counts = df_matricula_engenharia.groupby(['Matricula', 'Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
+#AlunoPorIdade
+df_formata_idade = df.copy()
+df_formata_idade.loc[:,'Idade'] = df_formata_idade['Idade'].astype(str)
+df_idade = df_formata_idade['Idade'].value_counts().to_frame()
+df_idade = df_idade.rename(columns={'Idade': 'Quantidade'})
+df_idade = df_idade.head(10)
 
 
-fig23 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação das alunas por Semestre de Ingresso - Engenharia',color_discrete_sequence=colors)
-fig23.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Semestre'})
 
-#QuantidadeAlunasMatriculadasTEL
-df_matricula_telematica = df_telematica_novo[(df_telematica_novo.Sexo=='F')]
-#df_matricula_telematica['Matricula'] = df_matricula_telematica['Matricula'].astype(str)
-df_matricula_telematica.loc[:,'Matricula'] = df_matricula_telematica['Matricula'].astype(str)
-grafico_matricula_telematica = df_matricula_telematica['Matricula'].value_counts().sort_index()
-colors = ['#6495ED']
-fig24 = px.bar(grafico_matricula_telematica,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre - Telemática',color_discrete_sequence=colors)
-fig24.update_layout(yaxis={'title':'Quantidade de alunas matriculadas'},
-                   xaxis={'title': 'Semestre'},showlegend=False)
-
-#SituçãoAlunasTEL
-df_matricula_tel = df_telematica_novo[(df_telematica_novo.Sexo=='F')]
-df_matricula_tel.loc[:,'Matricula'] = df_matricula_tel['Matricula'].astype(str)
-#df_matricula_tel['Matricula'] = df_matricula_tel['Matricula'].astype(str)
-
-colors = ['black','#9ACD32','#FF6347','#6495ED']
-
-counts = df_matricula_tel.groupby(['Matricula', 'Situacao']).size()
-counts = counts.unstack(level=-1)
-
-totals = counts.sum(axis=1)
-percentages = counts.divide(totals, axis=0)*100
-
-
-fig25 = px.bar(percentages,barmode = 'stack',color='Situacao', title='Situação das alunas por Semestre de Ingresso - Telemática',color_discrete_sequence=colors)
-fig25.update_layout(yaxis={'title':'Porcentagem'},
-                   xaxis={'title': 'Semestre'})
+colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
+fig14 = px.bar(df_idade,x=df_idade.index,y='count',title='Aluno por idade',color_discrete_sequence=[colors])
+fig14.update_layout(yaxis={'title':'Quantidade de Alunos pela Idade'},
+                   xaxis={'title': 'Idade'})
 ###################################LAYOUT###################################################################
-#dash.register_page(__name__, path='/')
+
 
 layout = html.Div([
     dbc.Row([
@@ -394,15 +223,32 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
+                        figure=fig1
+                    )),style={"width": "100%"},
+            ),width=6),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    dcc.Graph(
                         id='quantidade-total',
-                        figure=fig2
+                        figure=fig2)
+                    ),style={"width": "100%"},
+        ),width=6)
+    ],style={"width": "100%"}),
+
+    dbc.Row([
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    dcc.Graph(
+                        figure=fig4
                     )),style={"width": "100%"},
             ),width=4),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='quantidade-totaleng',
+                        id='grafico-situaçãotel',
                         figure=fig5)
                     ),style={"width": "100%"},
         ),width=4),
@@ -410,7 +256,7 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='quantidade-totaltel',
+                        id='grafico-situaçãotel',
                         figure=fig6)
                     ),style={"width": "100%"},
         ),width=4),
@@ -421,60 +267,16 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-situaçãogeral',
-                        figure=fig1
-                    )),style={"width": "100%"},
-            ),width=4),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-situaçãoeng',
-                        figure=fig3)
-                    ),style={"width": "100%"},
-        ),width=4),
-        dbc.Col(dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-situaçãoetel',
-                        figure=fig4)
-                    ),style={"width": "100%"},
-        ),width=4),
-    ],style={"width": "100%"}),
-
-    dbc.Row([
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-modalidade',
                         figure=fig9
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=6),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-sexo',
                         figure=fig10)
                     ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-zona',
-                        figure=fig11)
-                    ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-cor',
-                        figure=fig12)
-                    ),style={"width": "100%"},
-        ),width=3)
+        ),width=6)
     ],style={"width": "100%"}),
 
     dbc.Row([
@@ -482,132 +284,51 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-escola',
-                        figure=fig13
-                    )),style={"width": "100%"},
-            ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-idade1',
-                        figure=fig14)
-                    ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-idade2',
-                        figure=fig15)
-                    ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-renda',
-                        figure=fig16)
-                    ),style={"width": "100%"},
-        ),width=3)
-    ],style={"width": "100%"}),
-
-    dbc.Row([
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-naturalidade',
-                        figure=fig19
+                        figure=fig7
                     )),style={"width": "100%"},
             ),width=4),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-bairros',
-                        figure=fig20)
-                    ),style={"width": "100%"},
-        ),width=4),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-ingresso',
-                        figure=fig21)
-                    ),style={"width": "100%"},
-        ),width=4),
-    ],style={"width": "100%"}),
-
-    dbc.Row([
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-tempoconclusaoeng',
-                        figure=fig7
-                    )),style={"width": "100%"},
-            ),width=3),
-        dbc.Col(
-                dbc.Card(
-                    dbc.CardBody(
-                        dcc.Graph(
-                            id='ghistograma-tempoconclusaoeng',
-                            figure=fig17)
-                        ),style={"width": "100%"},
-            ),width=3),
-	    dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        id='grafico-tempoconclusaotel',
+                        id='grafico-situaçãotel',
                         figure=fig8)
                     ),style={"width": "100%"},
-        ),width=3),
-	    dbc.Col(
-                dbc.Card(
-                    dbc.CardBody(
-                        dcc.Graph(
-                            id='ghistograma-tempoconclusaotel',
-                            figure=fig18)
-                        ),style={"width": "100%"},
-            ),width=3)
+        ),width=4),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    dcc.Graph(
+                        id='grafico-situaçãotel',
+                        figure=fig11)
+                    ),style={"width": "100%"},
+        ),width=4),
     ],style={"width": "100%"}),
-
     dbc.Row([
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-alunaseng',
-                        figure=fig22
+                        figure=fig12
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=4),
         dbc.Col(
-                dbc.Card(
-                    dbc.CardBody(
-                        dcc.Graph(
-                            id='grafico-situacaoalunaseng',
-                            figure=fig23)
-                        ),style={"width": "100%"},
-            ),width=3),
-	    dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        id='grafico-alunastel',
-                        figure=fig24)
+                        id='grafico-situaçãotel',
+                        figure=fig13)
                     ),style={"width": "100%"},
-        ),width=3),
-	    dbc.Col(
-                dbc.Card(
-                    dbc.CardBody(
-                        dcc.Graph(
-                            id='grafico-situacaoalunastel',
-                            figure=fig25)
-                        ),style={"width": "100%"},
-            ),width=3)
-    ],style={"width": "100%"})
+        ),width=4),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    dcc.Graph(
+                        id='grafico-situaçãotel',
+                        figure=fig14)
+                    ),style={"width": "100%"},
+        ),width=4),
+    ],style={"width": "100%"}),
     
 ],style={"width": "100%"})
 
