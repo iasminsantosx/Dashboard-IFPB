@@ -39,7 +39,7 @@ def correcao_bairros(df):
     return df
 
 #RENOMENADO COLUNAS
-def renomenado_colunas(df,df_novo):
+def renomenado_colunas(df):
     df.rename(columns = {'Cor/Raca':'Cor_Raca'}, inplace = True)
     df.rename(columns = {'Situacao no ultimo periodo':'Situacao_no_ultimo_periodo'}, inplace = True)
     df.rename(columns = {'Ano de conclusao':'Ano_de_conclusao'}, inplace = True)
@@ -53,26 +53,11 @@ def renomenado_colunas(df,df_novo):
     df.rename(columns = {'Notas da selecao':'Notas_da_selecao'}, inplace = True)
     df.rename(columns = {'Tipo da escola anterior':'Tipo_da_escola_anterior'}, inplace = True)
     df.rename(columns = {'Tipo da zona residencial':'Tipo_da_zona_residencial'}, inplace = True)
+    df.rename(columns = {'Ano de ingresso':'Ano_de_ingresso'}, inplace = True)
 
-    df_novo.rename(columns = {'Ano de ingresso':'Ano_de_ingresso'}, inplace = True)
-    df_novo.rename(columns = {'Situacao no ultimo periodo':'Situacao_no_ultimo_periodo'}, inplace = True)
-    df_novo.rename(columns = {'Ano de conclusao':'Ano_de_conclusao'}, inplace = True)
-    df_novo.rename(columns = {'Diarios matriculados no ultimo periodo':'Diarios_matriculados_no_ultimo_periodo'}, inplace = True)
-    df_novo.rename(columns = {'Data da matricula':'Data_da_matricula'}, inplace = True)
-    df_novo.rename(columns = {'Data de conclusao':'Data_de_conclusao'}, inplace = True)
-    df_novo.rename(columns = {'Forma de ingresso':'Forma_de_ingresso'}, inplace = True)
-    df_novo.rename(columns = {'Tipo da escola anterior':'Tipo_da_escola_anterior'}, inplace = True)
-    df_novo.rename(columns = {'Tipo da zona residencial':'Tipo_da_zona_residencial'}, inplace = True)
+    return df
 
-    return df,df_novo
 
-def renomenado_colunas_tel_eng(df_engenharia_novo,df_telematica_novo):
-
-    df_engenharia_novo.rename(columns = {'Ano de ingresso':'Ano_de_ingresso'}, inplace = True)
-
-    df_telematica_novo.rename(columns = {'Ano de ingresso':'Ano_de_ingresso'}, inplace = True)
-    
-    return df_engenharia_novo,df_telematica_novo
 
 #AGRUPANDO FORMAS DE INGRESSO
 def agrupando_formas_de_ingresso(df):
@@ -109,28 +94,32 @@ def filtrando_ivs(df):
     df['IVS_valido'] = lista_ivs
     return df
 
-def geral(df,df_novo):
+def geral(df):
     # colocando todos os valores em letras minúsculas
     df = df.applymap(lambda x: str(x).lower() if isinstance(x, str) else x)
     df.isnull().sum()
+    
+    renomenado_colunas(df)
 
-    correcao_bairros(df)
-    # criando uma cópia do dataframe original
-    df_bairros = df.copy()
+    if 'Bairro' in df.columns :
+        correcao_bairros(df)
+        # criando uma cópia do dataframe original
+        df_bairros = df.copy()
 
-    # aplicando o filtro para identificar as linhas que possuem "-" ou erros específicos na coluna "Bairro"
-    indexNames = df_bairros[(df_bairros['Bairro'] == '-') | (df_bairros['Bairro'] == '55') | (df_bairros['Bairro'] == 'a') | (df_bairros['Bairro'] == 's/n')].index
+        # aplicando o filtro para identificar as linhas que possuem "-" ou erros específicos na coluna "Bairro"
+        indexNames = df_bairros[(df_bairros['Bairro'] == '-') | (df_bairros['Bairro'] == '55') | (df_bairros['Bairro'] == 'a') | (df_bairros['Bairro'] == 's/n')].index
 
-    # excluindo essas linhas do dataframe temporário
-    df_bairros.drop(indexNames, inplace=True)
+        # excluindo essas linhas do dataframe temporário
+        df_bairros.drop(indexNames, inplace=True)
 
-    renomenado_colunas(df,df_novo)
 
     agrupando_formas_de_ingresso(df)
 
-    lista_idades = df['Data_de_nascimento'].apply(idade)
-    df.insert(13, "Idade", lista_idades, True)
+    if 'Data_de_nascimento' in df.columns :
+        lista_idades = df['Data_de_nascimento'].apply(idade)
+        df.insert(13, "Idade", lista_idades, True)
 
-    filtrando_ivs(df)
+    if 'IVS_valido' in df.columns :
+        filtrando_ivs(df)
 
-    return df,df_novo
+    return df

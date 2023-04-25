@@ -18,7 +18,8 @@ df_telematica_novo = pd.read_excel(path_telematica,sheet_name="NOVO")
 df = pd.concat([df_engenharia,df_telematica], axis=0)
 df_novo = pd.concat([df_engenharia_novo,df_telematica_novo], axis=0)
 #######################################TRATAMENTO DE DADOS################################
-df,df_novo = geral(df,df_novo)
+df = geral(df)
+df_novo = geral(df_novo)
 
 df_agrupado = df.copy()
 df_agrupado['Situacao'] = df_agrupado['Situacao'].replace( ['cancelado voluntariamente', 'cancelado compulsoriamente', 'trancado', 'evadido', 'afastado', 'trancado voluntariamente','transferido externamente', 'transferido internamente'], 'evadido/trancado')

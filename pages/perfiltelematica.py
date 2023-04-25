@@ -4,89 +4,17 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import pandas as pd
 from tratamento_de_dados import geral
-from funcoes import descreve_informacoes
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
-from datetime import datetime, date
-import re
+
 ###########################Base de Dados###################################################
 path_telematica = '/home/iasmin/Documentos/TCC-Dashboard/dados_telematica.xlsx'
 
 df_telematica = pd.read_excel(path_telematica)
 df_telematica_novo = pd.read_excel(path_telematica,sheet_name="NOVO")
 #######################################TRATAMENTO DE DADOS################################
-df_telematica = df_telematica.applymap(lambda x: str(x).lower() if isinstance(x, str) else x)
+df_telematica = geral(df_telematica)
+df_telematica_novo = geral(df_telematica_novo)
 
-# função para encontrar a correspondência mais próxima
-def get_closest_match(word, possibilities):
-    if not word or not any(c.isalnum() for c in word):
-        return word
-    closest_match = process.extractOne(word, possibilities, scorer=fuzz.token_set_ratio)
-    if closest_match[1] >= 80:
-        return closest_match[0]
-    else:
-        return word
-    
-base_correcao = {"sandra cavalcante": "bairro sandra cavalcante", 
-               "presidente medici": "presidente medice",
-               "zona rural": "area rural",
-               "pedregal": "pedregal 58428-158",
-               "jardim paulistano": "pardim paulistano",
-               "rocha cavalcante": "rocha calvocante",
-               "ramadinha ii": "ramadinha 2",
-               "correa lima ii": "correia lima ii",
-               "tres irmas": "tres irmas (acacio figueiredo)",
-               "tres irmas": "tres irmas (portal sudoeste)",
-               "portal sudoeste": "portal sudoesta",
-               "portal sudoeste": "portal",
-               "serrotao": "sao januario-serrotao",
-               "bodocongo iii": "bodocongo 3",
-               "centro": "boa vista/ centro",
-               "malvinas": "malvinhas",
-               "universitario": "universitatio",
-               "palmeira": "palmeiras",
-               "mutirao": "multirao"
-              }
-
-if df_telematica['Bairro'].dtype == "object":
-  df_telematica['Bairro'] = df_telematica['Bairro'].apply(lambda x: get_closest_match(x, base_correcao.keys()))
-
-# criando uma cópia do dataframe original
-df_bairros = df_telematica.copy()
-
-# aplicando o filtro para identificar as linhas que possuem "-" ou erros específicos na coluna "Bairro"
-indexNames = df_bairros[(df_bairros['Bairro'] == '-') | (df_bairros['Bairro'] == '55') | (df_bairros['Bairro'] == 'a') | (df_bairros['Bairro'] == 's/n')].index
-
-# excluindo essas linhas do dataframe temporário
-df_bairros.drop(indexNames, inplace=True)
-
-df_telematica.rename(columns = {'Cor/Raca':'Cor_Raca'}, inplace = True)
-df_telematica.rename(columns = {'Situacao no ultimo periodo':'Situacao_no_ultimo_periodo'}, inplace = True)
-df_telematica.rename(columns = {'Ano de conclusao':'Ano_de_conclusao'}, inplace = True)
-df_telematica.rename(columns = {'IVS valido':'IVS_valido'}, inplace = True)
-df_telematica.rename(columns = {'Coeficiente de progressao':'Coeficiente_de_progressao'}, inplace = True)
-df_telematica.rename(columns = {'Cota SISTEC':'Cota_SISTEC'}, inplace = True)
-df_telematica.rename(columns = {'Data da matricula':'Data_da_matricula'}, inplace = True)
-df_telematica.rename(columns = {'Data de nascimento':'Data_de_nascimento'}, inplace = True)
-df_telematica.rename(columns = {'Faixa de renda (SISTEC)':'Faixa_de_renda_(SISTEC)'}, inplace = True)
-df_telematica.rename(columns = {'Forma de ingresso':'Forma_de_ingresso'}, inplace = True)
-df_telematica.rename(columns = {'Notas da selecao':'Notas_da_selecao'}, inplace = True)
-df_telematica.rename(columns = {'Tipo da escola anterior':'Tipo_da_escola_anterior'}, inplace = True)
-df_telematica.rename(columns = {'Tipo da zona residencial':'Tipo_da_zona_residencial'}, inplace = True)
-
-df_telematica['Forma_de_ingresso'] = df_telematica['Forma_de_ingresso'].replace( ['sistema de selecao unificada (sisu)', 'sisu (inativa)', 'sisu - ampla concorrencia (inativa)', 'sisu - cota_eep/ppi (inativa)', 'sisu - cota_eep (inativa)',  'sisu - cota_eep/renda/ppi (inativa)','sisu - cota_eep/renda (inativa)','sisu - cota_pcd (inativa)'], 'sistema de selecao unificada (sisu)')
-df_telematica['Forma_de_ingresso'].unique()
-
-def idade(born):
-    if born!= '-':
-      born = datetime.strptime(born, "%d/%m/%Y").date()
-      today = date.today()
-      return int(today.year - born.year - ((today.month, 
-                                        today.day) < (born.month, 
-                                                      born.day)))
-    
-lista_idades1 = df_telematica['Data_de_nascimento'].apply(idade)
-df_telematica.insert(13, "Idade", lista_idades1, True)
+###############################TRATAMENTO ESPECÍFICO#######################################
 
 df_conclusao_tel = df_telematica_novo.copy()
 
@@ -94,9 +22,9 @@ indexNames = df_conclusao_tel[(df_conclusao_tel['Data de conclusao'] == '-')].in
 
 df_conclusao_tel.drop(indexNames, inplace=True)
 
-df_conclusao_tel['Data da matricula'] = pd.to_datetime(df_conclusao_tel['Data da matricula'], format='%Y/%m/%d %H:%M:%S')
+df_conclusao_tel['Data_da_matricula'] = pd.to_datetime(df_conclusao_tel['Data_da_matricula'], format='%Y/%m/%d %H:%M:%S')
 df_conclusao_tel['Data de conclusao'] = pd.to_datetime(df_conclusao_tel['Data de conclusao'], format='%Y/%m/%d %H:%M:%S')
-df_conclusao_tel['Meses Conclusao'] = ((df_conclusao_tel['Data de conclusao'] - df_conclusao_tel['Data da matricula']).dt.days)/30
+df_conclusao_tel['Meses Conclusao'] = ((df_conclusao_tel['Data de conclusao'] - df_conclusao_tel['Data_da_matricula']).dt.days)/30
 df_conclusao_tel.loc[:,'Meses Conclusao'] = df_conclusao_tel['Meses Conclusao'].astype(int)
 
 df_agrupado_telematica = df_telematica.copy()
@@ -104,8 +32,8 @@ df_agrupado_telematica['Situacao'] = df_agrupado_telematica['Situacao'].replace(
 df_agrupado_telematica['Situacao'] = df_agrupado_telematica['Situacao'].replace( ['matriculado',  'intercambio', 'vinculado'], 'matriculado')
 df_agrupado_telematica['Situacao'].unique()
 
-df_telematica_novo['Situacao'] = df_telematica_novo['Situacao'].replace( ['Cancelado voluntariamente', 'Cancelado compulsoriamente', 'Trancado', 'Evadido', 'Afastado',  'Trancado voluntariamente','Transferido externamente', 'Transferido internamente'], 'evadido/trancado')
-df_telematica_novo['Situacao'] = df_telematica_novo['Situacao'].replace( ['Matriculado',  'Intercambio', 'Vinculado'], 'matriculado')
+df_telematica_novo['Situacao'] = df_telematica_novo['Situacao'].replace( ['cancelado voluntariamente', 'cancelado compulsoriamente', 'trancado', 'evadido', 'afastado',  'trancado voluntariamente','transferido externamente', 'transferido internamente'], 'evadido/trancado')
+df_telematica_novo['Situacao'] = df_telematica_novo['Situacao'].replace( ['matriculado',  'intercambio', 'vinculado'], 'matriculado')
 df_telematica_novo['Situacao'].unique()
 ##############################PLOTANDO GRAFICOS#############################################################
 
@@ -279,17 +207,32 @@ fig11.update_layout(yaxis={'title':'Porcentagem'},
 
 #Coeficiente de progressão
 
-fig21 = go.Figure(data=[go.Table(
-    header=dict(values=['Medidas', 'Coeficiente de Progressão'],
-                line_color='#6495ED',
-                fill_color='lightskyblue',
-                align='center'),
-    cells=dict(values=[['Quantidade', 'Média', 'Desvio padrão', 'Valor mínimo','Q1','Q2/Mediana','Q3','Valor máximo','Moda','Variância','Amplitude','Assimetria'], # 1st column
-                       [655, 32.28, 32.83, 0.0,4.58,21.19,49.41,100.00,0.0,1077.84,100,0.25]], # 2nd column
-               line_color='darkslategray',
-               fill_color='lightcyan',
-               align='center'))
-])
+df_evadidos = df_agrupado_telematica[(df_agrupado_telematica.Situacao.isin(['evadido/trancado'])) & (df_agrupado_telematica.Coeficiente_de_progressao!='-')]
+df_matriculado = df_agrupado_telematica[(df_agrupado_telematica.Situacao.isin(['matriculado'])) & (df_agrupado_telematica.Coeficiente_de_progressao!='-')]
+df_formado = df_agrupado_telematica[(df_agrupado_telematica.Situacao.isin(['formado'])) & (df_agrupado_telematica.Coeficiente_de_progressao!='-')]
+
+#Evadido
+df_notas_evadidos = df_evadidos['Coeficiente_de_progressao']
+df_notas_evadidos =  df_notas_evadidos.astype(str).str.replace(',','.')
+df_notas_evadidos = df_notas_evadidos.astype(float)
+df_notas_evadidos = df_notas_evadidos.mean()
+
+#Matriculado
+df_notas_matriculados = df_matriculado['Coeficiente_de_progressao']
+df_notas_matriculados =  df_notas_matriculados.astype(str).str.replace(',','.')
+df_notas_matriculados = df_notas_matriculados.astype(float)
+df_notas_matriculados = df_notas_matriculados.mean()
+
+#Formado
+df_notas_formados = df_formado['Coeficiente_de_progressao']
+df_notas_formados =  df_notas_formados.astype(str).str.replace(',','.')
+df_notas_formados = df_notas_formados.astype(float)
+df_notas_formados = df_notas_formados.mean()
+
+colors = ['#6495ED','#FF6347','#9ACD32']
+fig21 = px.bar(x=['matriculado','evadido/trancado','formado'],y=[df_notas_matriculados,df_notas_evadidos,df_notas_formados], title='Situação dos alunos pelas médias do Coeficiente de Progressão',color_discrete_sequence=[colors])
+fig21.update_layout(yaxis={'title':'Notas'},
+                   xaxis={'title': 'Áreas'})
 #SituaçãoxNotasSeleção
 
 df_evadidos = df_agrupado_telematica[df_agrupado_telematica.Situacao.isin(['evadido/trancado'])]
@@ -338,7 +281,7 @@ df_notas_formados = df_notas_formados.replace(r'(?<!\d)\.(?!\d)', '', regex=True
 df_notas_formados = df_notas_formados.replace(r'.*:', '', regex=True)
 df_notas_formados = df_notas_formados.astype(float).fillna(0)
 
-df_notas_formados = df_notas_formados /100
+df_notas_formados = df_notas_formados /10
 df_notas_formados = df_notas_formados.mean()
 
 df_concat = pd.concat([df_notas_matriculados,df_notas_evadidos,df_notas_formados], axis=1)
@@ -353,11 +296,11 @@ fig12.update_layout(yaxis={'title':'Notas'},
                    xaxis={'title': 'Áreas'})
 
 
-#Situação por semestres das alunas de engenharia
-df_matricula_engenharia = df_telematica_novo[(df_telematica_novo.Sexo=='F')]
+#Situação por semestres das alunas
+df_matricula_engenharia = df_telematica_novo[(df_telematica_novo.Sexo=='f')]
 df_matricula_engenharia.loc[:,'Matricula'] = df_matricula_engenharia['Matricula'].astype(str)
 
-colors = ['black','#9ACD32','#FF6347','#6495ED']
+colors = ['#FF6347','black','#9ACD32','#6495ED']
 
 counts10 = df_matricula_engenharia.groupby(['Matricula', 'Situacao']).size()
 counts10 = counts10.unstack(level=-1)
@@ -366,26 +309,26 @@ totals10 = counts10.sum(axis=1)
 percentages10 = counts10.divide(totals10, axis=0)*100
 
 
-fig13 = px.bar(percentages10,barmode = 'stack',color='Situacao', title='Situação das alunas por Semestre de Ingresso - Engenharia',color_discrete_sequence=colors)
+fig13 = px.bar(percentages10,barmode = 'stack',color='Situacao', title='Situação dos alunos do sexo feminino por Semestre de Ingresso',color_discrete_sequence=colors)
 fig13.update_layout(yaxis={'title':'Porcentagem'},
                    xaxis={'title': 'Semestre'})
 
 #Alunas matriculadas por Semestre
-df_matricula_engenharia1 = df_telematica_novo[(df_telematica_novo.Sexo=='F')]
+df_matricula_engenharia1 = df_telematica_novo[(df_telematica_novo.Sexo=='f')]
 df_matricula_engenharia1.loc[:,'Matricula'] = df_matricula_engenharia1['Matricula'].astype(str)
 grafico_matricula_engenharia1 = df_matricula_engenharia1['Matricula'].value_counts().sort_index()
 
 colors = ['#6495ED']
 
-fig14 = px.bar(grafico_matricula_engenharia1,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre de Ingresso - Engenharia',color_discrete_sequence=colors)
+fig14 = px.bar(grafico_matricula_engenharia1,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre de Ingresso',color_discrete_sequence=colors)
 fig14.update_layout(yaxis={'title':'Quantidade de alunas matriculadas'},
                    xaxis={'title': 'Semestre'},showlegend=False)
 
-#Situação por semestres dos alunos de engenharia
-df_matricula_engenharia2 = df_telematica_novo[(df_telematica_novo.Sexo=='M')]
+#Situação por semestres dos alunos
+df_matricula_engenharia2 = df_telematica_novo[(df_telematica_novo.Sexo=='m')]
 df_matricula_engenharia2.loc[:,'Matricula'] = df_matricula_engenharia2['Matricula'].astype(str)
 
-colors = ['#9ACD32','#FF6347','#6495ED']
+colors = ['#FF6347','#9ACD32','#6495ED']
 
 counts11 = df_matricula_engenharia2.groupby(['Matricula', 'Situacao']).size()
 counts11 = counts11.unstack(level=-1)
@@ -394,7 +337,7 @@ totals11 = counts11.sum(axis=1)
 percentages11 = counts11.divide(totals11, axis=0)*100
 
 
-fig15 = px.bar(percentages11,barmode = 'stack',color='Situacao', title='Situação dos alunos por Semestre de Ingresso - Engenharia',color_discrete_sequence=colors)
+fig15 = px.bar(percentages11,barmode = 'stack',color='Situacao', title='Situação dos alunos do sexo masculino por Semestre de Ingresso',color_discrete_sequence=colors)
 fig15.update_layout(yaxis={'title':'Porcentagem'},
                    xaxis={'title': 'Semestre'})
 
@@ -407,27 +350,27 @@ counts12 = counts12.unstack(level=-1)
 totals12 = counts12.sum(axis=1)
 percentages12 = counts12.divide(totals12, axis=0)*100
 
-colors = ['black','#9ACD32','#FF6347','#6495ED']
-fig16 = px.bar(percentages12,barmode = 'stack',color='Situacao', title='Situação dos alunos de cada semestre em Engenharia de Computação',color_discrete_sequence=colors)
+colors = ['#FF6347','black','#9ACD32','#6495ED']
+fig16 = px.bar(percentages12,barmode = 'stack',color='Situacao', title='Situação dos alunos de cada semestre em Telemática',color_discrete_sequence=colors)
 fig16.update_layout(yaxis={'title':'Porcentagem'},
                    xaxis={'title': 'Semestre'})
 
 #Meses conclusão
 colors = ['orange']
-fig17 = px.histogram(df_conclusao_tel,x='Meses Conclusao',color_discrete_sequence=colors)
+fig17 = px.histogram(df_conclusao_tel,x='Meses Conclusao',color_discrete_sequence=colors,title='Meses Conclusão - Telemática')
 
 #Tempo Conclusão
 
-concluintes_certo2 = df_conclusao_tel[df_conclusao_tel['Meses Conclusao'] > 60]['Meses Conclusao'].value_counts().sum()
-percent = (concluintes_certo2 / len(df_conclusao_tel)) * 100
+concluintes_certo = df_conclusao_tel[df_conclusao_tel['Meses Conclusao'] > 36]['Meses Conclusao'].value_counts().sum()
+percent = (concluintes_certo / len(df_conclusao_tel)) * 100
 
-labels = ['Superior 60 meses ', 'Igual ou inferior a 60 meses']
+labels = ['Superior 36 meses ', 'Igual ou inferior a 36 meses']
 sizes = [percent, 100-percent]
 colors = ["royalblue","orange"]
 
-fig18 = px.pie(values=sizes, names=['Superior 60 meses','Igual ou inferior a 60 meses'],color_discrete_sequence=colors)
+fig18 = px.pie(values=sizes, names=['Superior 36 meses','Igual ou inferior a 36 meses'],color_discrete_sequence=colors)
 
-fig18.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Tempo de Conclusão - Engenharia da Computação')
+fig18.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Tempo de Conclusão - Telemática')
 
 fig18.update_traces(textfont_size=16)
 
@@ -563,7 +506,7 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig12)
+                        figure=fig11)
                     ),style={"width": "100%"},
         ),width=4),
     ],style={"width": "100%"}),
@@ -573,7 +516,7 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig11
+                        figure=fig12
                     )),style={"width": "100%"},
             ),width=3),
         dbc.Col(

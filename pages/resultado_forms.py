@@ -2,14 +2,21 @@ from dash import html, dcc
 import plotly.express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
-from base_de_dados import matriculado_evadido
+import pandas as pd
 
 
 ###########################Base de Dados###################################################
 path_matriculado = '/home/iasmin/Documentos/TCC-Dashboard/matriculado.xlsx'
 path_evadido = '/home/iasmin/Documentos/TCC-Dashboard/evadido.xlsx'
 
-df_matriculado,df_evadido,df_eng_mat,df_tel_mat,df_eng_evd,df_tel_evd = matriculado_evadido(path_matriculado,path_evadido)
+df_matriculado = pd.read_excel(path_matriculado,engine = 'openpyxl')
+df_evadido= pd.read_excel(path_evadido,engine = 'openpyxl')
+    
+df_eng_mat = df_matriculado.loc[df_matriculado['Qual curso você está matriculado?'] == 'Engenharia de Computação']
+df_tel_mat = df_matriculado.loc[df_matriculado['Qual curso você está matriculado?'] == 'Telemática']
+df_eng_evd = df_evadido.loc[df_evadido['Qual curso você fazia: '] == 'Engenharia de Computação']
+df_tel_evd = df_evadido.loc[df_evadido['Qual curso você fazia: '] == 'Telemática']
+
 
 #####################################PLOTANDO###########################################
 #Curso de Referência_matriculado
@@ -44,7 +51,7 @@ count1.index = count1.index.astype(str)
 porcentagem = count1.apply((lambda x: (x*100)/count1.value_counts().sum()))
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig3 = px.bar(count1,color_discrete_sequence=[colors],title="Ano e Semestre de ingresso em Engenharia de Computação",text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem)])
+fig3 = px.bar(count1,color_discrete_sequence=[colors],title="Ano e Semestre de ingresso em Engenharia",text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem)])
 fig3.update_layout(showlegend=False,yaxis={'title':'Quantidade de Alunos'},
                    xaxis={'title': 'Semestre'})
 
@@ -131,10 +138,10 @@ porcentagem_disciplinas_eng1 = count_disciplinas_eng1 / disciplinas_eng1.shape[0
 top6_disciplinas_eng1 = porcentagem_disciplinas_eng1.head(6).sort_values(ascending=True)
 
 fig9 = px.bar(top6_disciplinas_eng1,
-             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(top6_disciplinas_eng1.index,top6_disciplinas_eng1)],color_discrete_sequence=[colors],title="Top 6 Disciplinas que os alunos matriculados em Engenharia de Computação tem dificuldade"
+             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(top6_disciplinas_eng1.index,top6_disciplinas_eng1)],color_discrete_sequence=[colors],title="Top 6 Disciplinas que os alunos matriculados em Engenharia tem dificuldade"
             )
 fig9.update_layout(plot_bgcolor = 'white',
-                  margin = dict(t=35, l=10, r=0, b=10),
+                  margin = dict(t=35, l=0, r=0, b=10),
                   yaxis={'categoryorder':'total descending'},
                   showlegend=False
                  )
@@ -150,10 +157,10 @@ porcentagem_disciplinas_eng2 = count_disciplinas_eng2 / disciplinas_eng2.shape[0
 top6_disciplinas_eng2 = porcentagem_disciplinas_eng2.head(6).sort_values(ascending=True)
 
 fig10 = px.bar(top6_disciplinas_eng2,
-             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(top6_disciplinas_eng2.index,top6_disciplinas_eng2)],color_discrete_sequence=[colors],title="Top 6 Disciplinas que os alunos evadidos em Engenharia de Computação tiveram dificuldade"
+             orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(top6_disciplinas_eng2.index,top6_disciplinas_eng2)],color_discrete_sequence=[colors],title="Top 6 Disciplinas que os alunos evadidos em Engenharia tiveram dificuldade"
             )
 fig10.update_layout(plot_bgcolor = 'white',
-                  margin = dict(t=35, l=10, r=0, b=10),
+                  margin = dict(t=35, l=0, r=0, b=10),
                   yaxis={'categoryorder':'total descending'},
                   showlegend=False
                  )
@@ -174,7 +181,7 @@ fig11 = px.bar(top6_disciplinas_tel1,
              orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(top6_disciplinas_tel1.index,top6_disciplinas_tel1)],color_discrete_sequence=[colors],title="Top 6 Disciplinas que os alunos matriculados em Telemática tiveram dificuldade"
             )
 fig11.update_layout(plot_bgcolor = 'white',
-                  margin = dict(t=40, l=10, r=0, b=10),
+                  margin = dict(t=40, l=0, r=0, b=10),
                   yaxis={'categoryorder':'total descending'},
                   showlegend=False
                  )
@@ -193,7 +200,7 @@ fig12 = px.bar(top6_disciplinas_tel2,
              orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(top6_disciplinas_tel2.index,top6_disciplinas_tel2)],color_discrete_sequence=[colors],title="Top 6 Disciplinas que os alunos evadidos em Telemática tiveram dificuldade"
             )
 fig12.update_layout(plot_bgcolor = 'white',
-                  margin = dict(t=40, l=10, r=0, b=10),
+                  margin = dict(t=40, l=0, r=0, b=10),
                   yaxis={'categoryorder':'total descending'},
                   showlegend=False
                  )
@@ -211,7 +218,7 @@ soma1 = soma1.rename(index=dict(zip(cols1, col_labels1)))
 soma1 = soma1.sort_values()
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig13 = px.bar(soma1,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos matriculados em Engenharia de Computação",orientation="h",text=[i for i in (soma1.index)])
+fig13 = px.bar(soma1,color_discrete_sequence=[colors],title="Fatores que influêciam para a escolha do curso dos matriculados em Engenharia",orientation="h",text=[i for i in (soma1.index)])
 fig13.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
                    xaxis={'title': 'Pontos'})
 fig13.update_traces(textposition='auto')
@@ -285,7 +292,7 @@ soma5 = soma5.rename(index=dict(zip(cols5, col_labels5)))
 soma5 = soma5.sort_values()
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig17 = px.bar(soma5,color_discrete_sequence=[colors],title="Fatores que influêciam para a permanência no curso de Engenharia de Computação",orientation="h",text=[i for i in (soma5.index)])
+fig17 = px.bar(soma5,color_discrete_sequence=[colors],title="Fatores que influêciam para a permanência no curso de Engenharia",orientation="h",text=[i for i in (soma5.index)])
 fig17.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
                    xaxis={'title': 'Pontos'})
 fig17.update_traces(textposition='auto')
@@ -323,7 +330,7 @@ soma7 = soma7.sort_values()
 soma7 = soma7.drop('Linha 10')
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d']
-fig19 = px.bar(soma7,color_discrete_sequence=[colors],title="Fatores que influêciam para a desistência ou abandono no curso de Engenharia de Computação",orientation="h",text=[i for i in (soma7.index)])
+fig19 = px.bar(soma7,color_discrete_sequence=[colors],title="Fatores que influêciam para a desistência ou abandono no curso de Engenharia",orientation="h",text=[i for i in (soma7.index)])
 fig19.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Fatores'},
                    xaxis={'title': 'Pontos'})
 fig19.update_traces(textposition='auto')
@@ -370,7 +377,7 @@ colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff',
 fig22 = px.pie(values=df_eng_mat['Em qual período foi o seu primeiro vínculo empregatício ou de estágio?'].value_counts(), names=df_eng_mat['Em qual período foi o seu primeiro vínculo empregatício ou de estágio?'].value_counts().index,
              color_discrete_sequence=colors)
 
-fig22.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Período em que se iniciou o vínculo empregatício - Engenharia de Computação')
+fig22.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Período em que se iniciou o vínculo empregatício - Engenharia')
 
 fig22.update_traces(textfont_size=16)
 
@@ -426,7 +433,7 @@ soma9 = soma9.rename(index=dict(zip(aval1, col_labels1)))
 soma9 = soma9.sort_values()
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d','#f94b00','#f97100','#f99e00','#f9bd00']
-fig27 = px.bar(soma9,color_discrete_sequence=[colors],title="Avaliação do curso de Engenharia de Computação, pelos matriculados",orientation="h",text=[i for i in (soma9.index)])
+fig27 = px.bar(soma9,color_discrete_sequence=[colors],title="Avaliação do curso de Engenharia, pelos matriculados",orientation="h",text=[i for i in (soma9.index)])
 fig27.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Áreas'},
                    xaxis={'title': 'Pontos'})
 fig27.update_traces(textposition='auto')
@@ -459,7 +466,7 @@ soma11 = soma11.rename(index=dict(zip(aval3, col_labels3)))
 soma11 = soma11.sort_values()
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361','#f9002d','#f94b00','#f97100','#f99e00','#f9bd00']
-fig29 = px.bar(soma11,color_discrete_sequence=[colors],title="Avaliação do curso de Engenharia de Computação, pelos evadidos",orientation="h",text=[i for i in (soma11.index)])
+fig29 = px.bar(soma11,color_discrete_sequence=[colors],title="Avaliação do curso de Engenharia, pelos evadidos",orientation="h",text=[i for i in (soma11.index)])
 fig29.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',showlegend=False,yaxis={'title':'Áreas'},
                    xaxis={'title': 'Pontos'})
 fig29.update_traces(textposition='auto')
@@ -557,28 +564,21 @@ layout = html.Div([
                     dcc.Graph(
                         figure=fig9
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=4),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig10)
+                        figure=fig13)
                     ),style={"width": "100%"},
-        ),width=3),
+        ),width=4),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig11)
+                        figure=fig17)
                     ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        figure=fig12)
-                    ),style={"width": "100%"},
-        ),width=3)
+        ),width=4),
     ],style={"width": "100%"}),
 
     dbc.Row([
@@ -586,30 +586,23 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig13
+                        figure=fig11
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=4),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
                         figure=fig14)
                     ),style={"width": "100%"},
-        ),width=3),
+        ),width=4),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig15)
+                        figure=fig18)
                     ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        figure=fig16)
-                    ),style={"width": "100%"},
-        ),width=3),
+        ),width=4),
     ],style={"width": "100%"}),
 
     dbc.Row([
@@ -617,30 +610,46 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig17
+                        figure=fig10
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=4),
         dbc.Col(
                 dbc.Card(
                     dbc.CardBody(
                         dcc.Graph(
-                            figure=fig18)
+                            figure=fig15)
                         ),style={"width": "100%"},
-            ),width=3),
+            ),width=4),
 	    dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
                         figure=fig19)
                     ),style={"width": "100%"},
-        ),width=3),
-	    dbc.Col(
+        ),width=4)
+    ],style={"width": "100%"}),
+    dbc.Row([
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    dcc.Graph(
+                        figure=fig12
+                    )),style={"width": "100%"},
+            ),width=4),
+        dbc.Col(
                 dbc.Card(
                     dbc.CardBody(
                         dcc.Graph(
-                            figure=fig20)
+                            figure=fig16)
                         ),style={"width": "100%"},
-            ),width=3)
+            ),width=4),
+	    dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    dcc.Graph(
+                        figure=fig20)
+                    ),style={"width": "100%"},
+        ),width=4)
     ],style={"width": "100%"}),
 
     dbc.Row([
@@ -696,28 +705,31 @@ layout = html.Div([
                     dcc.Graph(
                         figure=fig27
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=6),
         dbc.Col(
                 dbc.Card(
                     dbc.CardBody(
                         dcc.Graph(
-                            figure=fig28)
+                            figure=fig29)
                         ),style={"width": "100%"},
-            ),width=3),
-	    dbc.Col(
+            ),width=6)
+    ],style={"width": "100%"}),
+
+    dbc.Row([
+        dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig29)
-                    ),style={"width": "100%"},
-        ),width=3),
-	    dbc.Col(
+                        figure=fig28
+                    )),style={"width": "100%"},
+            ),width=6),
+        dbc.Col(
                 dbc.Card(
                     dbc.CardBody(
                         dcc.Graph(
                             figure=fig30)
                         ),style={"width": "100%"},
-            ),width=3)
+            ),width=6)
     ],style={"width": "100%"})
     
 ],style={"width": "100%"})

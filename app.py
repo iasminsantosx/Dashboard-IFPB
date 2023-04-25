@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from pages import index,perfiltelematica,perfilengenharia,resultado_forms
 
+
 app = dash.Dash(__name__, use_pages=True,external_stylesheets=[dbc.themes.LUX],suppress_callback_exceptions=True)
 
 app.layout = html.Div([
