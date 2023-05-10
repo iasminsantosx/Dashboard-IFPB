@@ -169,25 +169,27 @@ fig8.update_layout(yaxis={'title':'Porcentagem'},
                    xaxis={'title': 'Faixa de renda (SISTEC)'})
 
 #SituaçãoxIdade
-df_idade_maior_30 = df_agrupado_engenharia[df_agrupado_engenharia.Idade>=30]
-colors = ['#6495ED','#FF6347','#9ACD32']
+df_idade_matriculados = df_engenharia[df_engenharia.Situacao.isin(['matriculado',  'intercambio', 'vinculado'])]
+idade_17_20 = len(df_idade_matriculados[df_idade_matriculados.Idade<20])
+idade_20_25 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=20) & (df_idade_matriculados.Idade<25)])
+idade_25_30 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=25) & (df_idade_matriculados.Idade<30)])
+idade_30_35 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=30) & (df_idade_matriculados.Idade<35)])
+idade_35_40 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=35) & (df_idade_matriculados.Idade<40)])
+idade_40_45 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=40) & (df_idade_matriculados.Idade<45)])
+idade_45_50 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=45) & (df_idade_matriculados.Idade<50)])
 
-fig9 = px.pie(values=df_idade_maior_30['Situacao'].value_counts(), names=df_idade_maior_30['Situacao'].value_counts().index,
-             color_discrete_sequence=colors)
+lista_quantidade_idades = [idade_17_20,idade_20_25,idade_25_30,idade_30_35,idade_35_40,idade_40_45,idade_45_50]
+ 
+porcentagem = []
 
-fig9.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Situação dos Alunos com idade maior que 30')
+for i in lista_quantidade_idades:
+  p = (i*100)/sum(lista_quantidade_idades)
+  porcentagem.append(p)
 
-fig9.update_traces(textfont_size=16)
-
-df_idade_menor_30 = df_agrupado_engenharia[df_agrupado_engenharia.Idade<=30]
-colors = ['#6495ED','#FF6347','#9ACD32','black']
-
-fig10 = px.pie(values=df_idade_menor_30['Situacao'].value_counts(), names=df_idade_menor_30['Situacao'].value_counts().index,
-             color_discrete_sequence=colors)
-
-fig10.update_layout(margin = dict(t=50, l=100, r=100, b=0),title='Situação dos Alunos com idade menor que 30')
-
-fig10.update_traces(textfont_size=16)
+colors = ['#6495ED']
+fig9 = px.bar(x=['15-20','20-25','25-30','30-35','35-40','40-45','45-50'],y=[idade_17_20,idade_20_25,idade_25_30,idade_30_35,idade_35_40,idade_40_45,idade_45_50],title='Faixa de Idade dos matriculados',color_discrete_sequence=colors,text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem)])
+fig9.update_layout(yaxis={'title':'Quantidade de Alunos pela Idade'},
+                   xaxis={'title': 'Idade'})
 
 #SituaçãoxCota
 df_sem_traco4 = df_agrupado_engenharia[df_agrupado_engenharia.Cota_SISTEC!='-']
@@ -206,93 +208,13 @@ fig11.update_layout(yaxis={'title':'Porcentagem'},
 #Coeficiente de progressão
 
 df_evadidos = df_agrupado_engenharia[(df_agrupado_engenharia.Situacao.isin(['evadido/trancado'])) & (df_agrupado_engenharia.Coeficiente_de_progressao!='-')]
-df_matriculado = df_agrupado_engenharia[(df_agrupado_engenharia.Situacao.isin(['matriculado'])) & (df_agrupado_engenharia.Coeficiente_de_progressao!='-')]
-df_formado = df_agrupado_engenharia[(df_agrupado_engenharia.Situacao.isin(['formado'])) & (df_agrupado_engenharia.Coeficiente_de_progressao!='-')]
-
-#Evadido
 df_notas_evadidos = df_evadidos['Coeficiente_de_progressao']
 df_notas_evadidos =  df_notas_evadidos.astype(str).str.replace(',','.')
 df_notas_evadidos = df_notas_evadidos.astype(float)
-df_notas_evadidos = df_notas_evadidos.mean()
-
-#Matriculado
-df_notas_matriculados = df_matriculado['Coeficiente_de_progressao']
-df_notas_matriculados =  df_notas_matriculados.astype(str).str.replace(',','.')
-df_notas_matriculados = df_notas_matriculados.astype(float)
-df_notas_matriculados = df_notas_matriculados.mean()
-
-#Formado
-df_notas_formados = df_formado['Coeficiente_de_progressao']
-df_notas_formados =  df_notas_formados.astype(str).str.replace(',','.')
-df_notas_formados = df_notas_formados.astype(float)
-df_notas_formados = df_notas_formados.mean()
-
-colors = ['#6495ED','#FF6347','#9ACD32']
-fig21 = px.bar(x=['matriculado','evadido/trancado','formado'],y=[df_notas_matriculados,df_notas_evadidos,df_notas_formados], title='Situação dos alunos pelas médias do Coeficiente de Progressão',color_discrete_sequence=[colors])
-fig21.update_layout(yaxis={'title':'Notas'},
-                   xaxis={'title': 'Áreas'})
-#SituaçãoxNotasSeleção
-
-df_evadidos = df_agrupado_engenharia[df_agrupado_engenharia.Situacao.isin(['evadido/trancado'])]
-df_matriculado = df_agrupado_engenharia[df_agrupado_engenharia.Situacao.isin(['matriculado'])]
-df_formado = df_agrupado_engenharia[df_agrupado_engenharia.Situacao.isin(['formado'])]
-
-#Evadido
-df_notas_evadidos = df_evadidos['Notas_da_selecao'].str.split('; ', expand=True)
-
-df_notas_evadidos.columns = ['C.N.T.', 'C.H.T.', 'L.C.T.', 'M.T.', 'RED.']
-df_notas_evadidos = df_notas_evadidos.dropna()
-
-
-df_notas_evadidos = df_notas_evadidos.replace(r'[a-zA-Z\.= ]+', '', regex=True)
-df_notas_evadidos = df_notas_evadidos.replace(r'(?<!\d)\.(?!\d)', '', regex=True)
-df_notas_evadidos = df_notas_evadidos.replace(r'.*:', '', regex=True)
-df_notas_evadidos = df_notas_evadidos.astype(float).fillna(0)
-
-df_notas_evadidos = df_notas_evadidos / 100
-df_notas_evadidos = df_notas_evadidos.mean()
-
-#Matriculado
-df_notas_matriculados = df_matriculado['Notas_da_selecao'].str.split('; ', expand=True)
-
-df_notas_matriculados.columns = ['C.N.T.', 'C.H.T.', 'L.C.T.', 'M.T.', 'RED.']
-df_notas_matriculados = df_notas_matriculados.dropna()
-
-
-df_notas_matriculados = df_notas_matriculados.replace(r'[a-zA-Z\.= ]+', '', regex=True)
-df_notas_matriculados = df_notas_matriculados.replace(r'(?<!\d)\.(?!\d)', '', regex=True)
-df_notas_matriculados = df_notas_matriculados.replace(r'.*:', '', regex=True)
-df_notas_matriculados = df_notas_matriculados.astype(float).fillna(0)
-
-df_notas_matriculados = df_notas_matriculados / 100
-df_notas_matriculados = df_notas_matriculados.mean()
-
-#Formado
-df_notas_formados = df_formado['Notas_da_selecao'].str.split('; ', expand=True)
-
-df_notas_formados.columns = ['C.N.T.', 'C.H.T.', 'L.C.T.', 'M.T.', 'RED.']
-df_notas_formados = df_notas_formados.dropna()
-
-
-df_notas_formados = df_notas_formados.replace(r'[a-zA-Z\.= ]+', '', regex=True)
-df_notas_formados = df_notas_formados.replace(r'(?<!\d)\.(?!\d)', '', regex=True)
-df_notas_formados = df_notas_formados.replace(r'.*:', '', regex=True)
-df_notas_formados = df_notas_formados.astype(float).fillna(0)
-
-df_notas_formados = df_notas_formados /10
-df_notas_formados = df_notas_formados.mean()
-
-df_concat = pd.concat([df_notas_matriculados,df_notas_evadidos,df_notas_formados], axis=1)
-
-df_concat.rename(columns = {0:'matriculado'}, inplace = True)
-df_concat.rename(columns = {1:'evadido/trancado'}, inplace = True)
-df_concat.rename(columns = {2:'formado'}, inplace = True)
-
-colors = ['#6495ED','#FF6347','#9ACD32']
-fig12 = px.bar(df_concat, title='Situação dos alunos por Notas de Seleção',color_discrete_sequence=colors,barmode="group")
-fig12.update_layout(yaxis={'title':'Notas'},
-                   xaxis={'title': 'Áreas'})
-
+colors = ['#FF6347']
+fig21 = px.histogram(df_notas_evadidos,color_discrete_sequence=colors,title='Coeficiente de Progressão dos alunos evadidos/trancados')
+fig21.update_layout(yaxis={'title':'Quantidade de Alunos'},
+                   xaxis={'title': 'Coeficiente de Progressão'},showlegend=False)
 
 #Situação por semestres das alunas de engenharia
 df_matricula_engenharia = df_engenharia_novo[(df_engenharia_novo.Sexo=='f')]
@@ -311,16 +233,18 @@ fig13 = px.bar(percentages10,barmode = 'stack',color='Situacao', title='Situaç�
 fig13.update_layout(yaxis={'title':'Porcentagem'},
                    xaxis={'title': 'Semestre'})
 
-#Alunas matriculadas por Semestre
-df_matricula_engenharia1 = df_engenharia_novo[(df_engenharia_novo.Sexo=='f')]
+#Alunos matriculadas por Semestre
+df_matricula_engenharia1 = df_engenharia_novo.copy()
 df_matricula_engenharia1.loc[:,'Matricula'] = df_matricula_engenharia1['Matricula'].astype(str)
-grafico_matricula_engenharia1 = df_matricula_engenharia1['Matricula'].value_counts().sort_index()
 
-colors = ['#6495ED']
+absoluto = df_matricula_engenharia1.groupby(['Matricula', 'Sexo']).size()
+absoluto = absoluto.unstack(level=-1)
 
-fig14 = px.bar(grafico_matricula_engenharia1,barmode = 'stack', title='Quantidade de Alunas matriculadas por Semestre de Ingresso',color_discrete_sequence=colors)
-fig14.update_layout(yaxis={'title':'Quantidade de alunas matriculadas'},
-                   xaxis={'title': 'Semestre'},showlegend=False)
+colors = ['#ff33dd','#33e0ff']
+
+fig14 = px.bar(absoluto,barmode = 'stack',color='Sexo', title='Quantidade de alunos de cada sexo matriculados por semestre',color_discrete_sequence=colors)
+fig14.update_layout(yaxis={'title':'Quantidade de alunos'},
+                   xaxis={'title': 'Semestre'})
 
 #Situação por semestres dos alunos de engenharia
 df_matricula_engenharia2 = df_engenharia_novo[(df_engenharia_novo.Sexo=='m')]
@@ -514,30 +438,16 @@ layout = html.Div([
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
-                        figure=fig12
+                        figure=fig21
                     )),style={"width": "100%"},
-            ),width=3),
+            ),width=6),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody(
                     dcc.Graph(
                         figure=fig9)
                     ),style={"width": "100%"},
-        ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        figure=fig10
-                    )),style={"width": "100%"},
-            ),width=3),
-        dbc.Col(
-            dbc.Card(
-                dbc.CardBody(
-                    dcc.Graph(
-                        figure=fig21
-                    )),style={"width": "100%"},
-            ),width=3)
+        ),width=6),
     ],style={"width": "100%"}),
 
     dbc.Row([

@@ -94,6 +94,34 @@ def filtrando_ivs(df):
     df['IVS_valido'] = lista_ivs
     return df
 
+def filtrando_faixa_de_renda(df):
+    lista_renda = df['Faixa_de_renda_(SISTEC)'].to_list()
+
+    meio_salario = '0<rfp<=0,5'
+    um_salario = '0,5<rfp<=1'
+    ummeio_salario = '1,0<rfp<=1,5'
+    dois_salarios = '1,5<rfp<=2,5'
+    tres_salarios = '2,5<rfp<=3,5'
+    maior_que_tres = 'rfp>3,5'
+
+    for i in range(len(lista_renda)):
+        renda = lista_renda[i]
+        if renda in meio_salario:
+            lista_renda[i] = 'De 0 a 0,5 salário mínimo'
+        elif renda in um_salario:
+            lista_renda[i] = 'De 0,5 a 1 salário mínimo'
+        elif renda in ummeio_salario:
+            lista_renda[i] = 'De 1 a 1,5 salários mínimos'
+        elif renda in dois_salarios:
+            lista_renda[i] = 'De 1,5 a 2,5 salários mínimos'
+        elif renda in tres_salarios:
+            lista_renda[i] = 'De 2,5 a 3,5 salários mínimos'
+        elif renda in maior_que_tres:
+            lista_renda[i] = 'Maior que 3,5 salários mínimos'
+
+    df['Faixa_de_renda_(SISTEC)'] = lista_renda
+    return df
+
 def geral(df):
     # colocando todos os valores em letras minúsculas
     df = df.applymap(lambda x: str(x).lower() if isinstance(x, str) else x)
@@ -121,5 +149,8 @@ def geral(df):
 
     if 'IVS_valido' in df.columns :
         filtrando_ivs(df)
+
+    if 'Faixa_de_renda_(SISTEC)' in df.columns :
+        filtrando_faixa_de_renda(df)
 
     return df

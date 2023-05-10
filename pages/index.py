@@ -86,7 +86,7 @@ fig5.update_layout(margin = dict(t=0, l=0, r=0, b=0))
 valor_absoluto = df['Cor_Raca'].value_counts()
 porcentagem = valor_absoluto.apply((lambda x: (x*100)/df['Cor_Raca'].value_counts().sum()))
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
-fig6 = px.bar(porcentagem,title='Alunos por Cor/Raca dos cursos de TIC',
+fig6 = px.bar(valor_absoluto,title='Alunos por Cor/Raca dos cursos de TIC',
              orientation='h',text=[i+' ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto.index,porcentagem)],color_discrete_sequence=[colors],
             )
 fig6.update_layout(plot_bgcolor = 'white',
@@ -175,7 +175,7 @@ fig11.update_traces(textfont_size=16)
 valor_absoluto3 = df['Faixa_de_renda_(SISTEC)'].value_counts()
 porcentagem3 = valor_absoluto3.apply((lambda x: (x*100)/df['Faixa_de_renda_(SISTEC)'].value_counts().sum()))
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
-fig12 = px.bar(porcentagem3,
+fig12 = px.bar(valor_absoluto3,
              orientation='h',text=[i+'   ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto3.index,porcentagem3)],color_discrete_sequence=[colors],title='Alunos por Faixa de Renda'
             )
 fig12.update_layout(margin = dict(t=35, l=10, r=0, b=10),plot_bgcolor = 'white',
@@ -190,7 +190,7 @@ fig12.update_yaxes(visible=False)
 valor_absoluto4 = df['Forma_de_ingresso'].value_counts()
 porcentagem4 = valor_absoluto4.apply((lambda x: (x*100)/df['Forma_de_ingresso'].value_counts().sum()))
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
-fig13 = px.bar(porcentagem4,
+fig13 = px.bar(valor_absoluto4,
              orientation='h',text=[i+'   ' + str('{:,.2f}'.format(j)) +' %' for i,j in zip(valor_absoluto4.index,porcentagem4)],color_discrete_sequence=[colors],title='Aluno por Forma de ingresso'
             )
 fig13.update_layout(margin = dict(t=35, l=10, r=0, b=10),
@@ -203,18 +203,27 @@ fig13.update_xaxes(visible=False)
 fig13.update_yaxes(visible=False)
 
 #AlunoPorIdade
-df_formata_idade = df.copy()
-df_formata_idade.loc[:,'Idade'] = df_formata_idade['Idade'].astype(str)
-df_idade = df_formata_idade['Idade'].value_counts().to_frame()
-df_idade = df_idade.rename(columns={'Idade': 'Quantidade'})
-df_idade = df_idade.head(10)
+df_idade_matriculados = df[df.Situacao.isin(['matriculado',  'intercambio', 'vinculado'])]
+idade_17_20 = len(df_idade_matriculados[df_idade_matriculados.Idade<20])
+idade_20_25 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=20) & (df_idade_matriculados.Idade<25)])
+idade_25_30 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=25) & (df_idade_matriculados.Idade<30)])
+idade_30_35 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=30) & (df_idade_matriculados.Idade<35)])
+idade_35_40 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=35) & (df_idade_matriculados.Idade<40)])
+idade_40_45 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=40) & (df_idade_matriculados.Idade<45)])
+idade_45_50 = len(df_idade_matriculados[(df_idade_matriculados.Idade>=45) & (df_idade_matriculados.Idade<50)])
 
+lista_quantidade_idades = [idade_17_20,idade_20_25,idade_25_30,idade_30_35,idade_35_40,idade_40_45,idade_45_50]
+ 
+porcentagem = []
 
+for i in lista_quantidade_idades:
+  p = (i*100)/sum(lista_quantidade_idades)
+  porcentagem.append(p)
 
 colors = ['#33e0ff','#338aff','#3342ff','#6e33ff','#bb33ff','#d133ff','#e033ff','#ff33fc','#ff33dd','#ff33af','#ff3383','#ff3361']
-fig14 = px.bar(df_idade,x=df_idade.index,y='count',title='Aluno por idade',color_discrete_sequence=[colors])
+fig14 = px.bar(x=['17-20','20-25','25-30','30-35','35-40','40-45','45-50'],y=[idade_17_20,idade_20_25,idade_25_30,idade_30_35,idade_35_40,idade_40_45,idade_45_50],title='Faixa de Idade dos matriculados',color_discrete_sequence=[colors],text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem)])
 fig14.update_layout(yaxis={'title':'Quantidade de Alunos pela Idade'},
-                   xaxis={'title': 'Idade'})
+                   xaxis={'title': 'Faixa de Idade'})
 ###################################LAYOUT###################################################################
 
 
