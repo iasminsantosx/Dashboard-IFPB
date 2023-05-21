@@ -120,45 +120,18 @@ fig8.update_traces(textfont_size=16)
 
 #Naturalidade
 df_sem_traco3 = df[df.Naturalidade!='-']
-cidades = df_sem_traco3['Naturalidade'].value_counts().to_list()
+naturalidade = df_sem_traco3['Naturalidade'].value_counts()
+porcentagem3 = naturalidade.apply((lambda x: (x*100)/naturalidade.sum()))
 
-##################################################
-#Filtrando as 10 cidades com mais alunos do curso
-lista_top10_cidades_values1 = []
-lista_top10_cidades_values_nomes1 = []
-
-for i in range(9):
-  lista_top10_cidades_values1.append(cidades[i])
-
-
-nomes = df_sem_traco3['Naturalidade'].value_counts().index
-
-for i in range(9):
-  lista_top10_cidades_values_nomes1.append(nomes[i])
-####################################################
-
-fig9 = px.bar(x=lista_top10_cidades_values_nomes1,y=lista_top10_cidades_values1,title='Top 10 Naturalidades dos Alunos dos cursos de TIC',color_discrete_sequence=[colors])
+fig9 = px.bar(naturalidade.head(10),title='Top 10 Naturalidades dos Alunos dos cursos de TIC',color_discrete_sequence=[colors],text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem3.head(10))])
 
 #Bairros
 df_sem_traco3 = df[df.Bairro!='-']
-bairros = df_sem_traco3['Bairro'].value_counts().to_list()
+bairros = df_sem_traco3['Bairro'].value_counts()
 
-##################################################
-#Filtrando as 10 bairro com mais alunos do curso
-lista_top10_bairros_values = []
-lista_top10_bairros_values_nomes = []
+porcentagem4 = bairros.apply((lambda x: (x*100)/bairros.sum()))
 
-for i in range(9):
-  lista_top10_bairros_values.append(bairros[i])
-
-
-nomes = df_sem_traco3['Bairro'].value_counts().index
-
-for i in range(9):
-  lista_top10_bairros_values_nomes.append(nomes[i])
-####################################################
-
-fig10 = px.bar(x=lista_top10_bairros_values_nomes,y=lista_top10_bairros_values,title='Top 10 Bairros dos Alunos dos cursos de TIC',color_discrete_sequence=[colors])
+fig10 = px.bar(bairros.head(10),title='Top 10 Bairros dos Alunos dos cursos de TIC',color_discrete_sequence=[colors],text=[str('{:,.2f}'.format(i)) +' %' for i in (porcentagem4.head(10))])
 
 #CotaSISTEC
 df_sem_traco4 = df[df.Cota_SISTEC!='-']

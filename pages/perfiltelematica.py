@@ -195,8 +195,9 @@ fig9.update_layout(yaxis={'title':'Quantidade de Alunos pela Idade'},
                    xaxis={'title': 'Idade'})
 
 #SituaçãoxCota
-df_sem_traco4 = df_agrupado_telematica[df_agrupado_telematica.Cota_SISTEC!='-']
-counts9 = df_sem_traco4.groupby(['Cota_SISTEC','Situacao']).size()
+df_agrupado_telematica['Cota_SISTEC'] = df_agrupado_telematica['Cota_SISTEC'].replace( ['nao se aplica',  '-'], 'nao se aplica')
+df_agrupado_telematica['Cota_SISTEC'].unique()
+counts9 = df_agrupado_telematica.groupby(['Cota_SISTEC','Situacao']).size()
 counts9 = counts9.unstack(level=-1)
 
 totals9 = counts9.sum(axis=1)

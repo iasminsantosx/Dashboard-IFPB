@@ -13,9 +13,9 @@ app.layout = html.Div([
     html.Div([
         dbc.NavbarSimple(
             children=[
-                dbc.NavItem(dbc.NavLink("Dados Gerais", href="/")),
-                dbc.NavItem(dbc.NavLink("Perfil Engenharia", href="/perfilengenharia")),
-                dbc.NavItem(dbc.NavLink("Perfil Telemática", href="/perfiltelematica")),
+                dbc.NavItem(dbc.NavLink("Perfil Geral", href="/")),
+                dbc.NavItem(dbc.NavLink("Dados Engenharia", href="/dadosengenharia")),
+                dbc.NavItem(dbc.NavLink("Dados Telemática", href="/dadostelematica")),
                 dbc.NavItem(dbc.NavLink("Resultado Forms", href="/resultadoforms"))
             ] ,
             brand="Evasão Escolar em Cursos Superiores da Área de TI: Um Estudo de Caso no IFPB ",
@@ -32,9 +32,9 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/':
         return index.layout
-    if pathname == '/perfiltelematica':
+    if pathname == '/dadostelematica':
         return perfiltelematica.layout
-    if pathname == '/perfilengenharia':
+    if pathname == '/dadosengenharia':
         return perfilengenharia.layout
     if pathname == '/resultadoforms':
         return resultado_forms.layout
