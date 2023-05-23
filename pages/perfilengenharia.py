@@ -7,7 +7,7 @@ from tratamento_de_dados import geral
 from tratamento_de_dados import geral
 
 ###########################Base de Dados###################################################
-path_engenharia_de_computacao = '/home/iasmin/Documentos/TCC-Dashboard/dados_engenharia.xlsx'
+path_engenharia_de_computacao = 'dados_engenharia.xlsx'
 
 df_engenharia = pd.read_excel(path_engenharia_de_computacao)
 df_engenharia_novo = pd.read_excel(path_engenharia_de_computacao,sheet_name="NOVO")

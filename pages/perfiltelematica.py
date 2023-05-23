@@ -6,7 +6,7 @@ import pandas as pd
 from tratamento_de_dados import geral
 
 ###########################Base de Dados###################################################
-path_telematica = '/home/iasmin/Documentos/TCC-Dashboard/dados_telematica.xlsx'
+path_telematica = 'dados_telematica.xlsx'
 
 df_telematica = pd.read_excel(path_telematica)
 df_telematica_novo = pd.read_excel(path_telematica,sheet_name="NOVO")

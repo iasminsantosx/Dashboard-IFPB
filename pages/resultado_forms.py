@@ -6,8 +6,8 @@ import pandas as pd
 
 
 ###########################Base de Dados###################################################
-path_matriculado = '/home/iasmin/Documentos/TCC-Dashboard/matriculado.xlsx'
-path_evadido = '/home/iasmin/Documentos/TCC-Dashboard/evadido.xlsx'
+path_matriculado = 'matriculado.xlsx'
+path_evadido = 'evadido.xlsx'
 
 df_matriculado = pd.read_excel(path_matriculado,engine = 'openpyxl')
 df_evadido= pd.read_excel(path_evadido,engine = 'openpyxl')

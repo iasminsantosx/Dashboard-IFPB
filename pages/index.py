@@ -7,8 +7,8 @@ import pandas as pd
 
 
 ###########################Base de Dados###################################################
-path_engenharia_de_computacao = '/home/iasmin/Documentos/TCC-Dashboard/dados_engenharia.xlsx'
-path_telematica = '/home/iasmin/Documentos/TCC-Dashboard/dados_telematica.xlsx'
+path_engenharia_de_computacao = 'dados_engenharia.xlsx'
+path_telematica = 'dados_telematica.xlsx'
 
 df_engenharia = pd.read_excel(path_engenharia_de_computacao)
 df_telematica = pd.read_excel(path_telematica)
